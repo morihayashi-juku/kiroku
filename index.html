@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="生徒の記録">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5f3ee">
+<meta name="robots" content="noindex,nofollow">
+<title>生徒の記録</title>
+<style>
+:root{--bg:#f5f3ee;--card:#fff;--ink:#222;--sub:#6b6b6b;--line:#e3dfd6;--c:#3b6fd8;--ok:#2f9e6e;--ng:#d9534f}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;-webkit-text-size-adjust:100%;padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
+button,input,textarea{font:inherit;color:inherit}
+input,textarea{font-size:16px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;width:100%}
+input[type=date]{width:auto}
+header{position:sticky;top:0;background:var(--bg);padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;z-index:5;border-bottom:1px solid var(--line)}
+h1{font-size:17px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+h1 small{font-size:13px;color:var(--sub);font-weight:normal}
+nav{display:flex;gap:6px}
+nav button{flex:1;padding:10px 0;font-size:16px;border:1px solid var(--line);background:#fff;border-radius:10px}
+nav button.on{background:var(--c);color:#fff;border-color:var(--c);font-weight:bold}
+main{padding:12px;max-width:1100px;margin:0 auto}
+h2{font-size:17px;margin:22px 0 8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card{background:var(--card);border-radius:14px;padding:12px;border:1px solid var(--line);display:flex;flex-direction:column;gap:7px}
+.card-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.name{font-size:19px;font-weight:bold;background:none;border:none;padding:0;color:var(--c);text-align:left}
+.flag{font-size:12px;background:#fdecea;color:var(--ng);border-radius:6px;padding:3px 6px;font-weight:bold}
+.unit{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub);white-space:nowrap}
+.unit input{padding:6px 8px;font-size:16px}
+.sec{font-size:13px;color:var(--sub);font-weight:bold;margin-top:6px}
+.muted{color:var(--sub)}
+.small{font-size:12px}
+.issue{display:inline-flex;align-items:center;gap:4px;background:#fff6e6;border:1px solid #f0d9a8;border-radius:8px;padding:3px 3px 3px 8px;margin:2px 4px 2px 0;font-size:14px}
+.issue button{border:none;background:var(--ok);color:#fff;border-radius:6px;width:30px;height:28px;font-size:15px}
+.rl{font-size:14px;display:flex;gap:6px;align-items:baseline;border-top:1px dashed var(--line);padding-top:4px}
+.rl .d{color:var(--sub);min-width:34px}
+.rl .ct{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r{font-weight:bold}
+.r-o{color:var(--ok)}.r-d{color:#c98a00}.r-x{color:var(--ng)}
+.hw,.sc{font-size:13px;color:var(--sub)}
+.hw-done{color:var(--ok)}.hw-part{color:#c98a00}.hw-none{color:var(--ng)}
+.ss{font-size:14px;display:flex;flex-direction:column;gap:4px}
+.ss .hws span{font-size:17px;margin-right:2px}
+.bars{display:flex;align-items:flex-end;gap:3px;height:32px}
+.bar{width:12px;border-radius:3px 3px 0 0}
+.btn{font-size:16px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#fff;display:inline-block;text-align:center}
+.btn.primary{background:var(--c);color:#fff;border-color:var(--c);font-weight:bold}
+.btn.sm{padding:5px 10px;font-size:14px}
+.wide{width:100%;margin-top:4px}
+.big{padding:14px;font-size:18px;margin-top:16px}
+.danger{background:var(--ng)!important;color:#fff!important;border-color:var(--ng)!important}
+.del{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:8px;padding:4px 9px;font-size:13px;color:var(--sub)}
+.chip{display:inline-block;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:15px;margin:3px 5px 3px 0}
+.chip.on{background:var(--c);color:#fff;border-color:var(--c)}
+.chip.res.on{background:var(--ok);border-color:var(--ok)}
+.chip.res.on::before{content:"✓ "}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;padding:12px 0;font-size:16px;border:1px solid var(--line);background:#fff;border-radius:10px}
+.seg button.on{background:var(--c);color:#fff;border-color:var(--c);font-weight:bold}
+.score{display:flex;align-items:center;gap:8px}
+.stp{display:flex;align-items:center;gap:4px}
+.stp button{width:44px;height:44px;font-size:22px;border:1px solid var(--line);background:#fff;border-radius:10px}
+.stp input{width:64px;text-align:center;font-size:20px}
+.slash{font-size:22px;color:var(--sub)}
+.row{display:flex;align-items:center;gap:8px}
+.col{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:14px;color:var(--sub)}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.hidden{display:none}
+.panel{background:#fff;width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px 16px calc(env(safe-area-inset-bottom) + 18px);-webkit-overflow-scrolling:touch}
+.panel .sec{margin-top:14px;margin-bottom:6px}
+.ph{display:flex;justify-content:space-between;align-items:center;font-size:18px;margin-bottom:10px}
+.x{border:none;background:#eee;border-radius:8px;padding:7px 12px;font-size:15px}
+.empty{text-align:center;padding:40px 10px;color:var(--sub);line-height:2}
+.hint{font-size:13px;color:var(--sub);line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:14px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 16px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px}
+.il{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:5px 0}
+.il span:first-child{flex:1}
+.hl{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin:6px 0;font-size:15px;display:flex;flex-direction:column;gap:3px}
+.hl-top{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+details{margin-top:8px}summary{font-size:14px;color:var(--sub);padding:6px 0}
+.banner{background:#fff6e6;border:1px solid #f0d9a8;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:14px;display:flex;align-items:center;gap:10px}
+.banner span{flex:1}
+table{border-collapse:collapse;width:100%}
+th{font-size:14px;padding:4px}
+td{padding:4px;text-align:center;white-space:nowrap}
+td:first-child{text-align:left;font-weight:bold}
+td input{width:64px;text-align:center;padding:6px}
+.diff{display:block;font-size:12px;color:var(--sub)}.diff.up{color:var(--ok)}.diff.down{color:var(--ng)}
+.test{margin-bottom:10px}
+.addtest,.addst{display:flex;gap:6px;margin-bottom:12px}
+.addtest .btn,.addst .btn{white-space:nowrap;flex-shrink:0}
+.addtest input[type=date]{flex-shrink:0}
+.srow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:6px 0}
+.srow input{width:140px}
+.row-btns{display:flex;gap:8px}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);background:#333;color:#fff;padding:10px 18px;border-radius:999px;font-size:15px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
+#toast.show{opacity:.92}
+</style>
+</head>
+<body>
+<header>
+  <h1>生徒の記録 <small id="today"></small></h1>
+  <nav>
+    <button data-act="tab" data-v="eigo">英語</button>
+    <button data-act="tab" data-v="sugaku">数学</button>
+    <button data-act="tab" data-v="shakai">社会</button>
+    <button data-act="tab" data-v="test">テスト</button>
+    <button data-act="tab" data-v="set">設定</button>
+  </nav>
+</header>
+<main id="main"></main>
+<div id="sheet" class="sheet hidden"></div>
+<div id="toast"></div>
+<script>
+// データはこの端末のブラウザ（localStorage）にだけ保存されます。サーバーには送信しません。
+const KEY='seito-kiroku-v1';
+const SUBJ={eigo:{name:'英語',color:'#3b6fd8'},sugaku:{name:'数学',color:'#2f9e6e'},shakai:{name:'社会',color:'#d9822b'}};
+const SK=Object.keys(SUBJ);
+const DEFAULT_TAGS={
+  eigo:['be動詞と一般動詞の区別','否定文','疑問文','単語の意味','語順'],
+  sugaku:['符号のきまり','計算の順序','文字式','方程式','分数の方程式','移項','計算ミス'],
+  shakai:['用語を覚えていない','時代の順番','人物と出来事','資料の読み取り','講座を読めていない']
+};
+const RATE={o:'○ できた',d:'△ あいまい',x:'× できない'};
+const RATE_S={o:'○',d:'△',x:'×'};
+const HW={done:'やってきた',part:'一部だけ',none:'やってない'};
+const HW_S={done:'●',part:'◐',none:'○'};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const md=s=>{if(!s)return'';const p=s.split('-');return (+p[1])+'/'+(+p[2])};
+const wd=s=>'日月火水木金土'[new Date(s+'T00:00:00').getDay()];
+const pct=sc=>sc&&sc.total>0?Math.round(sc.got/sc.total*100):null;
+const daysSince=s=>Math.floor((new Date(today()+'T00:00:00')-new Date(s+'T00:00:00'))/864e5);
+
+function blank(){return{version:1,students:[],records:[],issues:[],tests:[],tags:JSON.parse(JSON.stringify(DEFAULT_TAGS)),lastExport:null}}
+function migrate(d){
+  if(!d||typeof d!=='object')return blank();
+  for(const k of ['students','records','issues','tests']) if(!Array.isArray(d[k])) d[k]=[];
+  if(!d.tags||typeof d.tags!=='object') d.tags=JSON.parse(JSON.stringify(DEFAULT_TAGS));
+  for(const k of SK) if(!Array.isArray(d.tags[k])) d.tags[k]=[...DEFAULT_TAGS[k]];
+  d.students.forEach(s=>{if(!Array.isArray(s.subjects))s.subjects=[];if(!s.unit||typeof s.unit!=='object')s.unit={}});
+  d.tests.forEach(t=>{if(!t.scores||typeof t.scores!=='object')t.scores={}});
+  return d;
+}
+let db;
+try{db=migrate(JSON.parse(localStorage.getItem(KEY)))}catch(e){db=blank()}
+
+let persistAsked=false;
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast('保存できませんでした')}
+  if(!persistAsked){persistAsked=true;try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),1800)}
+function armed(btn,label){
+  if(btn.dataset.armed)return true;
+  btn.dataset.armed='1';const o=btn.textContent;btn.textContent=label||'もう一度タップで削除';btn.classList.add('danger');
+  setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=o;btn.classList.remove('danger')}},3000);
+  return false;
+}
+
+let view={tab:'eigo',student:null};
+try{const t=localStorage.getItem(KEY+'-tab');if(t&&(SUBJ[t]||t==='test'||t==='set'))view.tab=t}catch(e){}
+function setTab(t){view={tab:t,student:null};try{localStorage.setItem(KEY+'-tab',t)}catch(e){}render();scrollTo(0,0)}
+
+const stOf=sk=>db.students.filter(s=>s.subjects.includes(sk));
+const recsOf=(sid,sk)=>db.records.filter(r=>r.studentId===sid&&r.subject===sk).sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts);
+const openIssues=(sid,sk)=>db.issues.filter(i=>i.studentId===sid&&i.subject===sk&&!i.resolved);
+
+function render(){
+  document.documentElement.style.setProperty('--c',SUBJ[view.tab]?SUBJ[view.tab].color:'#555');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===view.tab));
+  $('#today').textContent=md(today())+'（'+wd(today())+'）';
+  let h=backupBanner();
+  if(SUBJ[view.tab]) h+=view.student?renderHistory(view.tab,view.student):renderSubject(view.tab);
+  else if(view.tab==='test') h+=renderTests();
+  else h+=renderSettings();
+  $('#main').innerHTML=h;
+  if(view.tab==='set'){
+    const p=$('#persist');
+    if(p&&navigator.storage&&navigator.storage.persisted) navigator.storage.persisted().then(ok=>{p.textContent=ok?'保存の状態：消えにくい設定になっています':'保存の状態：通常（ホーム画面に追加して使うと消えにくくなります）'}).catch(()=>{});
+  }
+}
+
+function backupBanner(){
+  if(!db.records.length||view.tab==='set')return'';
+  const d=db.lastExport?daysSince(db.lastExport):null;
+  if(d!==null&&d<14)return'';
+  return `<div class="banner"><span>${d===null?'まだバックアップしていません。':'最後のバックアップから'+d+'日たちました。'}</span><button class="btn sm" data-act="export">今バックアップ</button></div>`;
+}
+
+function flag(rs){
+  const r=[];
+  const lh=rs.find(x=>x.hw); if(lh&&lh.hw==='none') r.push('宿題やってない');
+  const ls=rs.find(x=>pct(x.score)!=null); if(ls&&pct(ls.score)<60) r.push('正解率60%未満');
+  const rt=rs.filter(x=>x.rating).slice(0,2); if(rt.length===2&&rt.every(x=>x.rating==='x')) r.push('×が2回続いた');
+  return r.length?`<span class="flag">${r[0]}</span>`:'';
+}
+function recLine(r){
+  const p=pct(r.score);
+  return `<div class="rl"><span class="d">${md(r.date)}</span>${r.rating?`<span class="r r-${r.rating}">${RATE_S[r.rating]}</span>`:''}${r.hw?`<span class="hw hw-${r.hw}">宿題${HW_S[r.hw]}</span>`:''}${p!=null?`<span class="sc">${r.score.got}/${r.score.total}</span>`:''}<span class="ct">${esc(r.content)}</span></div>`;
+}
+function shakaiSummary(rs){
+  const hs=rs.filter(r=>r.hw).slice(0,6).reverse();
+  const ps=rs.filter(r=>pct(r.score)!=null).slice(0,6).reverse();
+  let h=`<div class="ss"><div class="hws">宿題 ${hs.length?hs.map(r=>`<span class="hw-${r.hw}">${HW_S[r.hw]}</span>`).join(''):'<span class="muted small">記録なし</span>'}</div>`;
+  if(ps.length) h+=`<div class="bars">${ps.map(r=>{const p=pct(r.score);return `<span class="bar" style="height:${Math.max(3,Math.round(p*0.32))}px;background:${p<60?'var(--ng)':'var(--c)'}"></span>`}).join('')}<span class="muted small" style="margin-left:6px">正解率 ${pct(ps[ps.length-1].score)}%</span></div>`;
+  return h+'</div>';
+}
+
+function renderSubject(sk){
+  const sts=stOf(sk);
+  if(!sts.length) return `<div class="empty">${SUBJ[sk].name}の生徒がまだいません。<br><button class="btn primary" data-act="tab" data-v="set">設定で生徒を追加</button></div>`;
+  let h='<div class="cards">';
+  for(const s of sts){
+    const rs=recsOf(s.id,sk), is=openIssues(s.id,sk);
+    const todayRec=rs.some(r=>r.date===today());
+    h+=`<div class="card">
+      <div class="card-top"><button class="name" data-act="hist" data-v="${s.id}">${esc(s.name)} ›</button>${flag(rs)}</div>
+      <label class="unit">進度<input data-unit="${s.id}" value="${esc(s.unit[sk]||'')}" placeholder="今の単元"></label>`;
+    if(sk==='shakai') h+=shakaiSummary(rs);
+    h+=`<div class="sec">つまずき${is.length?'':' <span class="muted small">なし</span>'}</div>`;
+    if(is.length) h+=`<div>${is.map(i=>`<span class="issue">${esc(i.text)}<button data-act="resolve" data-v="${i.id}" aria-label="解決">✓</button></span>`).join('')}</div>`;
+    h+=`<div class="sec">最近の記録</div>`+(rs.length?rs.slice(0,3).map(recLine).join(''):'<div class="muted small">まだありません</div>');
+    h+=`<button class="btn primary wide" data-act="rec" data-v="${s.id}">${todayRec?'＋ もう1件記録':'＋ 今日の記録'}</button></div>`;
+  }
+  h+='</div>';
+  if(sk==='shakai') h+=`<div class="hint">社会は宿題中心なので、宿題を回収したときに「やってきたか」と「問題の正解数」を記録します。授業のはじめに前回の範囲から3問だけ口頭で聞き、その正解数を記録すると、宿題をやったのに覚えていない子も見つけられます。</div>`;
+  return h;
+}
+
+function renderHistory(sk,sid){
+  const s=db.students.find(x=>x.id===sid);
+  if(!s){view.student=null;return renderSubject(sk)}
+  const rs=recsOf(sid,sk), open=openIssues(sid,sk);
+  const done=db.issues.filter(i=>i.studentId===sid&&i.subject===sk&&i.resolved).sort((a,b)=>b.resolved.localeCompare(a.resolved));
+  let h=`<button class="btn sm" data-act="back">‹ もどる</button><h2>${esc(s.name)}・${SUBJ[sk].name}</h2>`;
+  const rated=rs.filter(r=>r.rating).slice(0,10), cnt={o:0,d:0,x:0};
+  rated.forEach(r=>cnt[r.rating]++);
+  h+=`<div class="stats"><div>記録 <b>${rs.length}</b>件</div>${rated.length?`<div>最近${rated.length}回：<span class="r-o">○${cnt.o}</span> <span class="r-d">△${cnt.d}</span> <span class="r-x">×${cnt.x}</span></div>`:''}`;
+  const ps=rs.filter(r=>pct(r.score)!=null).slice(0,5);
+  if(ps.length) h+=`<div>正解率（最近${ps.length}回の平均）<b>${Math.round(ps.reduce((a,r)=>a+pct(r.score),0)/ps.length)}%</b></div>`;
+  if(sk==='shakai'){const hs=rs.filter(r=>r.hw).slice(0,10);if(hs.length)h+=`<div>宿題（最近${hs.length}回）やってきた <b>${hs.filter(r=>r.hw==='done').length}</b>回</div>`}
+  h+=`</div><button class="btn primary wide" data-act="rec" data-v="${sid}">＋ 記録する</button>`;
+  h+=`<div class="sec">つまずき（未解決）</div>`+(open.length?open.map(i=>`<div class="il"><span>${esc(i.text)}</span><span class="muted small">${md(i.created)}〜</span><button class="btn sm" data-act="resolve" data-v="${i.id}">解決</button></div>`).join(''):'<div class="muted small">なし</div>');
+  if(done.length) h+=`<details><summary>解決したつまずき（${done.length}）</summary>${done.map(i=>`<div class="il"><span>${esc(i.text)}</span><span class="muted small">${md(i.created)}→${md(i.resolved)}</span><button class="btn sm" data-act="unresolve" data-v="${i.id}">戻す</button></div>`).join('')}</details>`;
+  h+=`<div class="sec">記録</div>`+(rs.length?rs.map(r=>`<div class="hl"><div class="hl-top"><b>${md(r.date)}（${wd(r.date)}）</b>${r.rating?`<span class="r r-${r.rating}">${RATE[r.rating]}</span>`:''}${r.hw?`<span class="hw hw-${r.hw}">宿題 ${HW[r.hw]}</span>`:''}${r.score?`<span class="sc">${r.score.got}/${r.score.total}（${pct(r.score)}%）</span>`:''}<button class="del" data-act="delrec" data-v="${r.id}">削除</button></div>${r.content?`<div>${esc(r.content)}</div>`:''}${r.stumbles&&r.stumbles.length?`<div class="muted small">つまずき：${r.stumbles.map(esc).join('、')}</div>`:''}${r.resolved&&r.resolved.length?`<div class="small r-o">解決：${r.resolved.map(esc).join('、')}</div>`:''}</div>`).join(''):'<div class="muted small">まだありません</div>');
+  return h;
+}
+
+// ---- 記録シート ----
+let form=null;
+function stepper(n,v){return `<div class="stp"><button data-act="stp" data-n="${n}" data-d="-1">−</button><input id="f-${n}" type="number" inputmode="numeric" min="0" value="${esc(v)}"><button data-act="stp" data-n="${n}" data-d="1">＋</button></div>`}
+function openRec(sid,sk){
+  const s=db.students.find(x=>x.id===sid); if(!s)return;
+  const prev=recsOf(sid,sk).find(r=>r.score&&r.score.total);
+  form={sid,sk};
+  const is=openIssues(sid,sk);
+  let h=`<div class="panel"><div class="ph"><b>${esc(s.name)}・${SUBJ[sk].name}</b><button class="x" data-act="close">閉じる</button></div>
+    <label class="row">日付 <input type="date" id="f-date" value="${today()}"></label>
+    <label class="col">やったこと<input id="f-content" placeholder="例：一般動詞の否定文 p.3〜5"></label>`;
+  if(sk==='shakai') h+=`<div class="sec">宿題</div><div class="seg">${Object.keys(HW).map(k=>`<button data-act="f-one" data-g="hw" data-v="${k}">${HW_S[k]} ${HW[k]}</button>`).join('')}</div>`;
+  h+=`<div class="sec">できぐあい</div><div class="seg">${Object.keys(RATE).map(k=>`<button data-act="f-one" data-g="rate" data-v="${k}">${RATE[k]}</button>`).join('')}</div>`;
+  h+=`<div class="sec">${sk==='shakai'?'問題の正解数（宿題・確認の質問）':'小テスト・問題の正解数'} <span class="muted small">なければ空欄</span></div>
+    <div class="score">${stepper('got','')}<span class="slash">/</span>${stepper('total',prev?prev.score.total:'')}<span class="muted">問</span></div>`;
+  if(is.length) h+=`<div class="sec">前回までのつまずき <span class="muted small">今日できたらタップ→解決</span></div><div>${is.map(i=>`<button class="chip res" data-act="f-tog" data-g="res" data-v="${i.id}">${esc(i.text)}</button>`).join('')}</div>`;
+  h+=`<div class="sec">今日つまずいた所</div><div>${db.tags[sk].map(t=>`<button class="chip" data-act="f-tog" data-g="tag" data-v="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+    <input id="f-note" placeholder="ほかのつまずき（自由に）" style="margin-top:6px">
+    <button class="btn primary wide big" data-act="f-save">保存</button></div>`;
+  const sh=$('#sheet'); sh.innerHTML=h; sh.classList.remove('hidden'); document.body.style.overflow='hidden';
+}
+function closeSheet(){$('#sheet').classList.add('hidden');$('#sheet').innerHTML='';document.body.style.overflow='';form=null}
+function picked(g){return [...document.querySelectorAll(`#sheet button.on[data-g="${g}"]`)].map(b=>b.dataset.v)}
+function saveRec(){
+  const {sid,sk}=form;
+  const date=$('#f-date').value||today();
+  const content=$('#f-content').value.trim();
+  const note=$('#f-note').value.trim();
+  const got=$('#f-got').value.trim(), total=$('#f-total').value.trim();
+  const rating=picked('rate')[0]||'', hw=sk==='shakai'?(picked('hw')[0]||''):'';
+  const tags=picked('tag'), res=picked('res');
+  let score=null;
+  if(got!==''&&total!==''&&+total>0) score={got:Math.max(0,Math.min(+got,+total)),total:+total};
+  if(!content&&!rating&&!hw&&!score&&!tags.length&&!note&&!res.length){toast('何か1つ入力してください');return}
+  const stumbles=[...tags]; if(note) stumbles.push(note);
+  const resolvedTexts=[];
+  for(const id of res){const i=db.issues.find(x=>x.id===id);if(i){i.resolved=date;resolvedTexts.push(i.text)}}
+  for(const t of stumbles){
+    if(!db.issues.some(i=>i.studentId===sid&&i.subject===sk&&!i.resolved&&i.text===t))
+      db.issues.push({id:uid(),studentId:sid,subject:sk,text:t,created:date,resolved:null});
+  }
+  db.records.push({id:uid(),ts:Date.now(),date,studentId:sid,subject:sk,content,rating,hw,score,stumbles,resolved:resolvedTexts});
+  save(); closeSheet(); render(); toast('保存しました');
+}
+
+// ---- テスト ----
+function renderTests(){
+  let h=`<div class="addtest"><input id="t-name" placeholder="テスト名（例：2学期期末）"><input id="t-date" type="date" value="${today()}"><button class="btn primary" data-act="addtest">追加</button></div>`;
+  const ts=[...db.tests].sort((a,b)=>b.date.localeCompare(a.date));
+  if(!ts.length) return h+'<div class="empty">定期テストの点数をここに記録できます。<br>前のテストとの差も表示されます。</div>';
+  if(!db.students.length) return h+'<div class="empty">先に設定で生徒を追加してください。</div>';
+  for(const t of ts){
+    const prev=db.tests.filter(x=>x.date<t.date).sort((a,b)=>b.date.localeCompare(a.date))[0];
+    h+=`<div class="card test"><div class="card-top"><b>${esc(t.name)}</b><span class="muted small">${md(t.date)}</span><button class="del" data-act="deltest" data-v="${t.id}">削除</button></div><table><tr><th></th>${SK.map(k=>`<th style="color:${SUBJ[k].color}">${SUBJ[k].name}</th>`).join('')}</tr>`;
+    for(const s of db.students){
+      h+=`<tr><td>${esc(s.name)}</td>${SK.map(k=>{
+        if(!s.subjects.includes(k)) return '<td class="muted">—</td>';
+        const v=t.scores[s.id]?.[k], pv=prev?.scores?.[s.id]?.[k];
+        let diff='';
+        if(typeof v==='number'&&typeof pv==='number'){const d=v-pv;diff=`<span class="diff ${d>0?'up':d<0?'down':''}">${d>0?'+':''}${d}</span>`}
+        return `<td><input type="number" inputmode="numeric" min="0" data-score="${t.id}|${s.id}|${k}" value="${typeof v==='number'?v:''}">${diff}</td>`;
+      }).join('')}</tr>`;
+    }
+    h+='</table></div>';
+  }
+  return h;
+}
+
+// ---- 設定 ----
+function renderSettings(){
+  let h=`<h2>生徒</h2><p class="muted small">名前はあだ名やイニシャルがおすすめです。教科をタップして切りかえます。</p>`;
+  for(const s of db.students){
+    h+=`<div class="srow"><input data-sname="${s.id}" value="${esc(s.name)}"><div>${SK.map(k=>`<button class="chip ${s.subjects.includes(k)?'on':''}" style="--c:${SUBJ[k].color}" data-act="ssub" data-v="${s.id}|${k}">${SUBJ[k].name}</button>`).join('')}</div><button class="del" data-act="delst" data-v="${s.id}">削除</button></div>`;
+  }
+  h+=`<div class="addst" style="margin-top:8px"><input id="new-st" placeholder="新しい生徒の名前"><button class="btn primary" data-act="addst">追加</button></div>`;
+  h+=`<h2>つまずきの選択肢</h2><p class="muted small">1行に1つ。記録のときにタップで選べます。</p>`+SK.map(k=>`<label class="col"><b style="color:${SUBJ[k].color}">${SUBJ[k].name}</b><textarea data-tags="${k}" rows="5">${esc(db.tags[k].join('\n'))}</textarea></label>`).join('');
+  h+=`<h2>バックアップ</h2><p class="muted small" style="line-height:1.7">データはこのiPadの中だけに保存されています。ネットやGitHubには送られません。もしもの時のために、ときどき書き出して、ファイルアプリやiCloud Driveに保存してください。</p>
+    <div class="row-btns"><button class="btn primary" data-act="export">書き出す</button><label class="btn">読み込む<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
+    <p class="muted small">最後に書き出した日：${db.lastExport?md(db.lastExport):'まだ'}</p>
+    <p class="muted small" id="persist"></p>
+    <h2>ホーム画面に追加</h2><p class="muted small" style="line-height:1.7">Safariの共有ボタン →「ホーム画面に追加」で、アプリのように全画面で使えます。データも消えにくくなるので、この使い方がおすすめです。</p>
+    <h2>すべて削除</h2><button class="btn" data-act="wipe">全データを削除</button>`;
+  return h;
+}
+
+// ---- バックアップ ----
+async function exportData(){
+  const name=`seito-kiroku-${today()}.json`;
+  const file=new File([JSON.stringify(db)],name,{type:'application/json'});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})) await navigator.share({files:[file],title:name});
+    else{const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000)}
+    db.lastExport=today(); save(); render(); toast('書き出しました');
+  }catch(e){if(e&&e.name!=='AbortError')toast('書き出せませんでした')}
+}
+function importData(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let d;
+    try{d=JSON.parse(r.result);if(!d||!Array.isArray(d.students))throw 0}catch(e){toast('このファイルは読み込めません');return}
+    if(!confirm('今のデータを、このファイルの内容に置きかえます。よろしいですか？'))return;
+    db=migrate(d); save(); render(); toast('読み込みました');
+  };
+  r.readAsText(file);
+}
+
+// ---- 操作 ----
+document.addEventListener('click',e=>{
+  if(e.target.id==='sheet'){closeSheet();return}
+  const b=e.target.closest('[data-act]'); if(!b)return;
+  const a=b.dataset.act, v=b.dataset.v;
+  switch(a){
+    case 'tab': setTab(v); break;
+    case 'hist': view.student=v; render(); scrollTo(0,0); break;
+    case 'back': view.student=null; render(); scrollTo(0,0); break;
+    case 'rec': openRec(v,view.tab); break;
+    case 'close': closeSheet(); break;
+    case 'f-one': {const was=b.classList.contains('on');b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));if(!was)b.classList.add('on');break}
+    case 'f-tog': b.classList.toggle('on'); break;
+    case 'stp': {const i=$('#f-'+b.dataset.n);i.value=Math.max(0,(parseInt(i.value)||0)+(+b.dataset.d));break}
+    case 'f-save': saveRec(); break;
+    case 'resolve': {const i=db.issues.find(x=>x.id===v);if(i){i.resolved=today();save();render();toast('解決にしました')}break}
+    case 'unresolve': {const i=db.issues.find(x=>x.id===v);if(i){i.resolved=null;save();render()}break}
+    case 'delrec': if(armed(b)){db.records=db.records.filter(r=>r.id!==v);save();render()} break;
+    case 'addtest': {const n=$('#t-name').value.trim();if(!n){toast('テスト名を入れてください');break}db.tests.push({id:uid(),name:n,date:$('#t-date').value||today(),scores:{}});save();render();break}
+    case 'deltest': if(armed(b)){db.tests=db.tests.filter(t=>t.id!==v);save();render()} break;
+    case 'ssub': {const [sid,k]=v.split('|');const s=db.students.find(x=>x.id===sid);if(!s)break;s.subjects=s.subjects.includes(k)?s.subjects.filter(x=>x!==k):[...s.subjects,k];save();b.classList.toggle('on');break}
+    case 'addst': {const n=$('#new-st').value.trim();if(!n){toast('名前を入れてください');break}db.students.push({id:uid(),name:n,subjects:[...SK],unit:{}});save();render();toast(n+' を追加しました');break}
+    case 'delst': if(armed(b,'もう一度で削除（記録も消えます）')){db.students=db.students.filter(s=>s.id!==v);db.records=db.records.filter(r=>r.studentId!==v);db.issues=db.issues.filter(i=>i.studentId!==v);db.tests.forEach(t=>delete t.scores[v]);save();render()} break;
+    case 'export': exportData(); break;
+    case 'wipe': if(armed(b,'もう一度タップで全部消えます')){db=blank();save();render();toast('削除しました')} break;
+  }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.unit){const s=db.students.find(x=>x.id===t.dataset.unit);if(s){s.unit[view.tab]=t.value.trim();save();toast('進度を保存しました')}}
+  else if(t.dataset.score){const [tid,sid,k]=t.dataset.score.split('|');const ts=db.tests.find(x=>x.id===tid);if(!ts)return;ts.scores[sid]=ts.scores[sid]||{};if(t.value.trim()==='')delete ts.scores[sid][k];else ts.scores[sid][k]=Number(t.value);save()}
+  else if(t.dataset.sname){const s=db.students.find(x=>x.id===t.dataset.sname);if(s){s.name=t.value.trim()||s.name;t.value=s.name;save()}}
+  else if(t.dataset.tags){db.tags[t.dataset.tags]=t.value.split('\n').map(x=>x.trim()).filter(Boolean);save();toast('保存しました')}
+  else if(t.id==='imp'){importData(t.files[0]);t.value=''}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='new-st'){e.preventDefault();$('[data-act="addst"]').click()}});
+render();
+</script>
+</body>
+</html>
