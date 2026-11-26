@@ -11,381 +11,234 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
 <style>
-/* VOICE: 塾の先生の手元の台帳。落ち着いていて、すぐ書き込める
-   IDEA: 進度表・出席簿。罫線の紙に「済」のはんこを押していく
-   PICTURE: 生徒ごとのカード＝進度表そのもの。はんこ（次・中・済・再）
-   COLOUR and TYPE: 白い紙と墨色、英語は藍、数学は朱、社会は緑、理科は紫。Zen Maru Gothic＋BIZ UDPGothic
-   LAYOUT: 上に細いバー（切りかえ・絞り込み）、下にカードの格子。iPad mini縦で2列、スマホで1列 */
+/* VOICE: 塾の先生の手元の台帳。見るだけで「だれが今どこか」がわかる
+   IDEA: 職員室の進度表。教材サイトの記録を自動で写した一覧に、済のはんこが並ぶ
+   PICTURE: 組ごとのカード（今ここ・今の回・はんこ・これまでの回の列）
+   COLOUR and TYPE: 白い紙と墨色、英語は藍、数学は朱、はんこは朱。Zen Maru Gothic＋BIZ UDPGothic
+   LAYOUT: 上に細いバー（切りかえ・絞り込み）、学年ごとの見出しの下にカードの格子。iPad mini縦で2列 */
 :root{color-scheme:light dark;
 --bg:light-dark(#f6f4ee,#14161a);--paper:light-dark(#fff,#1d2026);--ink:light-dark(#1d2027,#ebe8e1);
 --sub:light-dark(#5b606c,#a5a9b2);--rule:light-dark(#e2ded3,#323641);--soft:light-dark(#efece4,#262a32);
---en:light-dark(#2643c2,#93a6ff);--ma:light-dark(#cf431c,#ff8d6a);--sha:light-dark(#2c7a4b,#7fd09d);--ri:light-dark(#7a3db5,#c79ef2);
---stamp:light-dark(#d1372a,#ff7a6a);--doing:light-dark(#b87b00,#f2c14e);--todo:light-dark(#6b7080,#9aa0ad)}
+--en:light-dark(#2643c2,#93a6ff);--ma:light-dark(#cf431c,#ff8d6a);--sha:light-dark(#2c7a4b,#7fd09d);
+--stamp:light-dark(#d1372a,#ff7a6a);--doing:light-dark(#b87b00,#f2c14e)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "BIZ UDPGothic",system-ui,sans-serif;overflow-x:clip}
-button,input,select,textarea{font:inherit;color:inherit}
+button,input{font:inherit;color:inherit}
 h1,h2,h3{font-family:"Zen Maru Gothic","BIZ UDPGothic",sans-serif;margin:0;line-height:1.2}
 a{color:inherit}
-[data-k=en]{--c:var(--en)}[data-k=ma]{--c:var(--ma)}[data-k=sha]{--c:var(--sha)}[data-k=ri]{--c:var(--ri)}
+[data-k=en]{--c:var(--en)}[data-k=ma]{--c:var(--ma)}[data-k=sha]{--c:var(--sha)}
 .top{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px max(3vw,12px)}
 .row1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .row1 h1{font-size:20px;font-weight:900;margin-right:auto}
 .tabs{display:flex;background:var(--soft);border-radius:12px;padding:3px}
-.tabs a{padding:9px 14px;border-radius:9px;text-decoration:none;font-weight:700;font-size:15px;min-height:40px;display:flex;align-items:center}
+.tabs a{padding:8px 12px;border-radius:9px;text-decoration:none;font-weight:700;font-size:15px;min-height:40px;display:flex;align-items:center;white-space:nowrap}
 .tabs a[aria-current]{background:var(--paper);box-shadow:0 1px 3px rgb(0 0 0/.12)}
 .row2{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
 .seg{display:flex;gap:4px;flex-wrap:wrap}
 .seg button{border:1px solid var(--rule);background:var(--paper);border-radius:999px;padding:6px 12px;min-height:38px;cursor:pointer;font-size:15px}
 .seg button[aria-pressed=true]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:var(--paper);font-weight:700}
-select,input[type=search],input[type=text],input[type=date],textarea{border:1px solid var(--rule);background:var(--paper);border-radius:10px;padding:8px 10px;min-height:42px;font-size:16px}
-input[type=search]{flex:1 1 180px}
-.btn{border:0;border-radius:10px;padding:9px 14px;min-height:42px;font-weight:700;cursor:pointer;background:var(--ink);color:var(--paper)}
-.btn.ghost{background:var(--soft);color:var(--ink)}
+.stamp-t{margin-left:auto;font-size:13px;color:var(--sub);display:flex;gap:8px;align-items:center}
+.btn{border:0;border-radius:10px;padding:8px 12px;min-height:40px;font-weight:700;cursor:pointer;background:var(--soft);color:var(--ink)}
+input[type=search]{border:1px solid var(--rule);background:var(--paper);border-radius:10px;padding:8px 12px;min-height:46px;font-size:16px;width:100%}
 :focus-visible{outline:3px solid var(--en);outline-offset:2px}
 main{padding:16px max(3vw,12px) 40px;max-width:1240px;margin:0 auto}
+.grade{margin-bottom:26px}
+.grade>h2{font-size:22px;font-weight:900;margin-bottom:10px;display:flex;align-items:baseline;gap:10px}
+.grade>h2 small{font:14px "BIZ UDPGothic",sans-serif;color:var(--sub)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:14px;align-items:start}
-.card{background:var(--paper);border:1px solid var(--rule);border-radius:16px;overflow:hidden}
-.card>header{display:flex;align-items:baseline;gap:8px;padding:12px 14px 8px;flex-wrap:wrap}
-.nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:24px;text-decoration:none}
-.gr{font-size:13px;font-weight:700;background:var(--soft);border-radius:6px;padding:2px 7px}
-.memo{font-size:13px;color:var(--sub);flex-basis:100%}
-.sb{border-top:1px solid var(--rule);padding:8px 14px 10px;background:linear-gradient(90deg,var(--c) 0 4px,transparent 4px)}
-.sb h3{display:flex;align-items:center;gap:8px;font-size:16px;color:var(--c)}
-.sb h3 small{font:13px "BIZ UDPGothic",sans-serif;color:var(--sub);margin-right:auto}
-.add{border:1px solid var(--c,var(--rule));color:var(--c,var(--ink));background:transparent;border-radius:999px;padding:4px 12px;min-height:36px;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap}
-ul{list-style:none;margin:6px 0 0;padding:0}
-.rec{display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px dashed var(--rule)}
-.rec:last-child{border-bottom:0}
-.stamp{flex:none;width:40px;height:40px;border-radius:50%;border:2px solid var(--sc);color:var(--sc);background:transparent;font:900 17px "Zen Maru Gothic",sans-serif;cursor:pointer;display:grid;place-items:center}
-.st-todo{--sc:var(--todo)}.st-doing{--sc:var(--doing)}.st-done{--sc:var(--stamp)}.st-redo{--sc:var(--ma)}
-.st-done .stamp{transform:rotate(-12deg);border-style:double;border-width:3px}
-.st-doing .stamp{background:color-mix(in srgb,var(--doing) 14%,transparent)}
-.tt{flex:1;text-align:left;background:none;border:0;padding:6px 0;cursor:pointer;min-height:40px;line-height:1.35}
-.tt small{display:block;color:var(--sub);font-size:13px}
-.age{flex:none;font-size:13px;color:var(--sub);white-space:nowrap}
-.age.warn{color:var(--stamp);font-weight:700}
-.none,.empty{color:var(--sub);font-size:14px;padding:6px 0;margin:0}
-.last{margin:6px 0 0;font-size:13px;color:var(--sub)}
-.last span{white-space:nowrap}
-.hero{background:var(--paper);border:1px solid var(--rule);border-radius:16px;padding:28px;text-align:center}
-.hero h2{font-size:26px;margin-bottom:8px}
-.arch{margin-top:20px;color:var(--sub)}
-.arch a{margin-right:12px}
-.shead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.shead h2{font-size:34px;font-weight:900}
-.shead .back{text-decoration:none;font-weight:700;color:var(--sub);flex-basis:100%}
-.sum{display:flex;gap:14px;color:var(--sub);flex-basis:100%;font-size:15px}
-.sum b{color:var(--ink);font-size:20px}
-table{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--rule);border-radius:12px;overflow:hidden;margin-bottom:22px}
-th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule);vertical-align:middle}
-th{font-size:13px;color:var(--sub);font-weight:700;background:var(--soft)}
-td.d{white-space:nowrap;font-variant-numeric:tabular-nums}
-.tbl-h{font-size:20px;color:var(--c);margin:6px 0 8px;display:flex;gap:10px;align-items:center}
-.grp{margin-bottom:22px}
-.grp h2{font-size:20px;color:var(--c);margin-bottom:8px;padding-left:10px;border-left:5px solid var(--c)}
-.sheets li{display:flex;gap:10px;align-items:center;background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:6px 12px;margin-bottom:6px;flex-wrap:wrap}
-.sheets .sh{flex:1 1 220px}
-.who{display:flex;gap:6px;flex-wrap:wrap;flex:2 1 220px}
-.who button{display:flex;align-items:center;gap:5px;border:1px solid var(--rule);background:var(--soft);border-radius:999px;padding:3px 10px 3px 3px;min-height:34px;cursor:pointer;font-size:14px}
-.who b{width:26px;height:26px;border-radius:50%;border:2px solid var(--sc);color:var(--sc);display:grid;place-items:center;font:900 13px "Zen Maru Gothic",sans-serif}
-.note{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:14px;max-width:92vw;z-index:20}
-.modal{position:fixed;inset:0;background:rgb(0 0 0/.42);display:grid;place-items:center;z-index:10;padding:12px}
-.panel{background:var(--paper);border-radius:18px;padding:20px;width:min(560px,100%);max-height:calc(100vh - 24px);overflow:auto;display:grid;gap:12px}
-.panel h2{font-size:22px}
-.panel h3{font-size:17px;margin-top:6px}
-.panel label{display:grid;gap:4px;font-weight:700;font-size:14px}
-.panel fieldset{border:0;padding:0;margin:0}
-.panel legend{font-weight:700;font-size:14px;margin-bottom:4px}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{display:flex!important;align-items:center;gap:6px;border:1px solid var(--rule);border-radius:999px;padding:6px 12px;min-height:40px;cursor:pointer;font-weight:400!important;font-size:15px!important}
-.chip input{accent-color:var(--c,var(--ink));width:18px;height:18px;margin:0}
-.chip:has(:checked){border-color:var(--c,var(--ink));background:color-mix(in srgb,var(--c,var(--ink)) 12%,transparent);font-weight:700!important}
-.check{display:flex!important;align-items:center;gap:8px;font-weight:400!important}
-.hint{margin:-6px 0 0;font-size:13px;color:var(--sub)}
-.btns{display:flex;gap:8px;align-items:center;margin-top:4px}
-.btns span{flex:1}
-.del{background:none;border:1px solid var(--stamp);color:var(--stamp);border-radius:10px;padding:8px 12px;min-height:42px;cursor:pointer}
-.del[data-armed]{background:var(--stamp);color:#fff;font-weight:700}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.warn{max-width:1240px;margin:12px auto 0;width:calc(100% - 2*max(3vw,12px));padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--doing) 18%,var(--paper));border:1px solid var(--doing);font-size:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.warn button{margin-left:auto}
-.setp{margin:0;font-size:14px;line-height:1.7;color:var(--sub)}
-footer{color:var(--sub);font-size:13px;text-align:center;padding:0 16px 30px;max-width:720px;margin:0 auto}
-@media(max-width:600px){.row1 h1{font-size:17px;flex-basis:100%}.shead h2{font-size:28px}.two{grid-template-columns:1fr}
-table{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--rule)}.stack td{display:flow-root;border:0;padding:3px 10px;padding-inline-start:7em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:6.5em;margin-inline-start:-6.5em;color:var(--sub);font-size:13px}.stack td:empty{display:none}}
-@media(prefers-reduced-motion:no-preference){.stamp{transition:transform .25s}.st-done .stamp{animation:pon .3s}@keyframes pon{from{transform:scale(1.5) rotate(-12deg);opacity:.3}}}
-</style><script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script></head><body>
+.card{background:var(--paper);border:1px solid var(--rule);border-radius:16px;overflow:hidden;border-top:6px solid var(--c)}
+.card>header{display:flex;align-items:baseline;gap:8px;padding:12px 14px 4px;flex-wrap:wrap}
+.nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:26px}
+.sj{font-size:13px;font-weight:700;color:var(--paper);background:var(--c);border-radius:6px;padding:2px 8px}
+.ln{font-size:13px;color:var(--sub)}
+.upd{margin-left:auto;font-size:13px;color:var(--sub);white-space:nowrap}
+.upd.warn{color:var(--stamp);font-weight:700}
+.now{padding:4px 14px 10px}
+.now .lbl{font-size:12px;color:var(--sub);font-weight:700}
+.now p{margin:0;font-weight:700;font-size:17px;line-height:1.45}
+.now .step{font-size:13px;color:var(--sub);font-weight:400}
+.cur{margin:0 14px 10px;padding:10px 12px;border-radius:12px;background:var(--soft)}
+.cur h3{font-size:16px;display:flex;gap:8px;align-items:baseline}
+.cur h3 .lb{color:var(--c);font-size:20px;flex:none}
+.stamps{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.st{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--sub)}
+.st b{width:30px;height:30px;border-radius:50%;border:2px dashed var(--rule);display:grid;place-items:center;font:900 13px "Zen Maru Gothic",sans-serif;color:transparent}
+.st.on{color:var(--ink)}
+.st.on b{border:3px double var(--stamp);color:var(--stamp);transform:rotate(-12deg)}
+.prints{list-style:none;margin:8px 0 0;padding:0;font-size:14px}
+.prints li{padding:3px 0;border-top:1px dashed var(--rule);display:flex;gap:6px}
+.prints li:first-child{border-top:0}
+.prints .k{flex:none;font-size:12px;color:var(--sub);min-width:4.5em}
+.hist{padding:0 14px 6px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;border-radius:999px;border:1px solid var(--rule);font-size:14px;background:var(--paper);white-space:nowrap}
+.chip.done{border-color:var(--stamp);color:var(--stamp);font-weight:700}
+.chip.cur{background:var(--c);border-color:var(--c);color:var(--paper);font-weight:700}
+details{padding:0 14px 10px}
+summary{cursor:pointer;font-size:14px;color:var(--sub);min-height:36px;display:flex;align-items:center}
+.hl{list-style:none;margin:0;padding:0;font-size:14px}
+.hl li{display:flex;gap:8px;padding:5px 0;border-top:1px dashed var(--rule);align-items:baseline}
+.hl .lb{flex:none;font-weight:700;color:var(--c);min-width:3.2em}
+.hl .t{flex:1}
+.hl .ok{flex:none;color:var(--stamp);font-weight:700;font-size:13px}
+.log1{margin:0 14px 10px;font-size:13px;color:var(--sub)}
+.open{display:block;text-align:right;padding:8px 14px 12px;font-size:14px;font-weight:700;color:var(--c);text-decoration:none;border-top:1px solid var(--rule)}
+.empty{color:var(--sub);font-size:14px;padding:6px 14px 12px;margin:0}
+.err{background:color-mix(in srgb,var(--stamp) 12%,var(--paper));border:1px solid var(--stamp);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:14px}
+.tl{list-style:none;margin:0;padding:0;max-width:820px}
+.tl li{display:grid;grid-template-columns:5.2em 6em 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.tl .d{font-variant-numeric:tabular-nums;color:var(--sub);white-space:nowrap}
+.tl .w{font-weight:700;color:var(--c)}
+.res{list-style:none;margin:14px 0 0;padding:0}
+.res li{background:var(--paper);border:1px solid var(--rule);border-left:5px solid var(--c);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.res .t{font-weight:700}
+.res .m{font-size:13px;color:var(--sub)}
+.res .chips{margin-top:6px}
+.hint{color:var(--sub);font-size:14px}
+footer{color:var(--sub);font-size:13px;text-align:center;padding:0 16px 30px;max-width:760px;margin:0 auto;line-height:1.7}
+@media(max-width:600px){.row1 h1{font-size:17px;flex-basis:100%}.tl li{grid-template-columns:4.5em 1fr}.tl .x{grid-column:1/-1}}
+@media(prefers-reduced-motion:no-preference){.card{animation:in .3s both}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
+</style></head><body>
 <div class="top">
   <div class="row1">
     <h1>プリント進度ボード</h1>
-    <nav class="tabs" aria-label="表示の切りかえ"><a href="#board" id="tBoard">生徒ごと</a><a href="#sheets" id="tSheets">プリントごと</a></nav>
-    <button class="btn" id="addStudent" type="button">＋ 生徒</button>
-    <button class="btn" id="addSheet" type="button" hidden>＋ プリント</button>
-    <button class="btn ghost" id="openSet" type="button">設定</button>
+    <nav class="tabs" aria-label="表示の切りかえ"><a href="#now" id="tNow">いまどこ</a><a href="#log" id="tLog">記録</a><a href="#find" id="tFind">プリントをさがす</a></nav>
   </div>
   <div class="row2">
-    <select id="fGrade" aria-label="学年でしぼる"></select>
     <div class="seg" id="fSubj" role="group" aria-label="教科でしぼる"></div>
-    <input type="search" id="fQ" placeholder="プリント名・単元でさがす" hidden>
+    <div class="seg" id="fGrade" role="group" aria-label="学年でしぼる"></div>
+    <span class="stamp-t"><span id="loadedAt"></span><button class="btn" id="reload" type="button">最新にする</button></span>
   </div>
 </div>
-<div id="warn" class="warn" hidden></div>
-<main id="main"><p class="empty">読み込み中…</p></main>
-<footer>データはこの端末のブラウザの中にだけ保存されます。GitHubやサーバーには送られません。ときどき「設定 → 書き出す」でバックアップしてください。</footer>
-<div class="modal" id="modal" hidden></div>
-<div class="note" id="note" hidden role="status"></div>
+<main id="main"><p class="hint">教材サイトから読み込み中…</p></main>
+<footer>この表は、数学・英語の教材サイトのデータ（今ここの回・プリントの一覧・記録）から自動で作っています。教材サイトを更新すれば、ここにも反映されます。<br>はんこ（印刷した・木曜済など）は、教材サイトで付けたチェックです。同じ端末・同じブラウザで開いたときに表示されます。</footer>
 <script>
 {
-const SUBJ=['英語','数学','社会','理科'];
-const SUBK={'英語':'en','数学':'ma','社会':'sha','理科':'ri'};
-const GRADES=['小学生','中1','中2','中3','高1','高2','高3','その他'];
-const ST={todo:{s:'次',l:'次にやる'},doing:{s:'中',l:'取り組み中'},done:{s:'済',l:'済'},redo:{s:'再',l:'やり直し'}};
-const ORD={doing:0,redo:1,todo:2,done:3};
+/* 読みに行く教材サイト。教科を足すときはここに1つ足す */
+const SRC=[
+  {id:'sugaku',subj:'数学',k:'ma',base:'/sugaku/',shelf:'sugaku-shelf',ck:(t,s,c)=>`${t}/${s.id}-${c}`,tracksFallback:['u','k','n']},
+  {id:'eigo',subj:'英語',k:'en',base:'/eigo/',shelf:'eigo-shelf',ck:(t,s,c)=>`${s.id}-${c}`,tracksFallback:['futari','hitori']}
+];
+const GRADES=['中1','中2','中3','高1','高2','高3'];
+const KIND={thu:'木曜',mon:'月曜',lesson:'授業',hw:'宿題',study:'自習',teacher:'先生用'};
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today=()=>new Date().toLocaleDateString('sv-SE');
-const md=d=>/^\d{4}-\d\d-\d\d$/.test(d||'')?(+d.slice(5,7))+'/'+(+d.slice(8,10)):'';
-const days=d=>md(d)?Math.floor((Date.parse(today())-Date.parse(d))/864e5):0;
-const nid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-const kOf=x=>SUBK[x]||'en';
-const KEY='shindo-v1';
-const blank=()=>({students:[],sheets:[],records:[],lastExport:null});
-let S=blank();
-try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&Array.isArray(d.students))S={...blank(),...d}}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){note('保存できませんでした');return false}}
-function changed(){const ok=save();if(M.hidden)render();return ok}
-let F={grade:'',subj:''},Q='';
-try{Object.assign(F,JSON.parse(localStorage.getItem('pb-f')||'{}'))}catch(e){}
-const saveF=()=>{try{localStorage.setItem('pb-f',JSON.stringify(F))}catch(e){}};
+const md=d=>/^\d{4}-\d\d-\d\d/.test(d||'')?(+d.slice(5,7))+'/'+(+d.slice(8,10)):'';
+const days=d=>md(d)?Math.floor((Date.parse(today())-Date.parse(d.slice(0,10)))/864e5):null;
+let F={subj:'',grade:''},Q='';
+try{Object.assign(F,JSON.parse(localStorage.getItem('shindo-f')||'{}'))}catch(e){}
+const saveF=()=>{try{localStorage.setItem('shindo-f',JSON.stringify(F))}catch(e){}};
+let TR=[],FILES={},ERR=[],loadedAt=null,loading=true;
 
-let nt;
-function note(t){const n=$('#note');n.textContent=t;n.hidden=false;clearTimeout(nt);nt=setTimeout(()=>n.hidden=true,3500)}
-async function put(col,id,data){const a=S[col],i=a.findIndex(x=>x.id===id),o={...data,id};if(i<0)a.push(o);else a[i]=o;return changed()}
-async function upd(col,id,data){const o=S[col].find(x=>x.id===id);if(!o)return false;Object.assign(o,data);return changed()}
-async function del(col,id){S[col]=S[col].filter(x=>x.id!==id);return changed()}
-
-const stu=id=>S.students.find(x=>x.id===id);
-const sht=id=>S.sheets.find(x=>x.id===id);
-const ttl=r=>(sht(r.sheetId)||{}).title||r.title||'（無題）';
-const unitOf=r=>(sht(r.sheetId)||{}).unit||r.unit||'';
-const byStu=(a,b)=>GRADES.indexOf(a.grade)-GRADES.indexOf(b.grade)||String(a.name).localeCompare(String(b.name),'ja');
-const recsOf=(sid,x)=>S.records.filter(r=>r.studentId===sid&&(!x||r.subject===x));
-
-function route(){const h=location.hash.slice(1);if(h.startsWith('s-'))return{v:'student',id:h.slice(2)};if(h==='sheets')return{v:'sheets'};return{v:'board'}}
-
-function toolbar(r){
-  $('#tBoard').toggleAttribute('aria-current',r.v!=='sheets');$('#tSheets').toggleAttribute('aria-current',r.v==='sheets');
-  $('#addSheet').hidden=r.v!=='sheets';$('#addStudent').hidden=r.v==='sheets';$('#fQ').hidden=r.v!=='sheets';
-  $('#fGrade').innerHTML='<option value="">すべての学年</option>'+GRADES.map(g=>`<option${g===F.grade?' selected':''}>${g}</option>`).join('');
-  $('#fSubj').innerHTML=`<button type="button" data-x="" aria-pressed="${!F.subj}">全教科</button>`+SUBJ.map(x=>`<button type="button" data-x="${x}" data-k="${kOf(x)}" aria-pressed="${F.subj===x}">${x}</button>`).join('');
-  $('.row2').hidden=r.v==='student';
+const getJ=async u=>{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(r.status+' '+u);return r.json()};
+const shelf=k=>{try{return JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){return{}}};
+function gradeOf(src,id,d){
+  const g=d.grade||d.badge||'';const m=(g+' '+(d.longName||'')).match(/[中高][1-3]/);
+  if(m)return m[0];
+  if(src.id==='sugaku'){if(/^chu2/.test(id))return'中2';if(/^chu3/.test(id))return'中3';if(/^kou1/.test(id))return'高1';if(/^kou2/.test(id))return'高2'}
+  return'中1';
+}
+async function loadSrc(src){
+  const common=await getJ(src.base+'data/common.json');
+  const ids=common.tracks||src.tracksFallback;
+  const steps={};
+  for(const u of common.units||[]){if(u.steps)for(const s of u.steps)steps[s.id]=u.name+'　'+s.name;else steps[u.id]=u.name}
+  for(const s of (common.jitsu&&common.jitsu.steps)||[])steps[s.id]='実力テスト　'+s.name;
+  for(const n of common.nyushi||[])for(const s of n.steps||[])steps[s.id]=n.name+'　'+s.name;
+  const lib={};
+  await Promise.all((common.libraries||[]).map(async l=>{try{const d=await getJ(src.base+'data/'+l+'.json');for(const it of d.items||[])lib[it.file]=it}catch(e){ERR.push(src.subj+'：'+l+'.json を読めませんでした')}}));
+  const ck=shelf(src.shelf);
+  const out=await Promise.all(ids.map(async id=>{
+    try{const d=await getJ(src.base+'data/'+id+'.json');return{src,id,d}}catch(e){ERR.push(src.subj+'：'+id+'.json を読めませんでした');return null}
+  }));
+  return out.filter(Boolean).map(({src,id,d})=>{
+    const checks=d.checks||[];
+    const sets=(d.sets||[]).map(s=>{
+      const items=[];
+      for(const g of s.groups||[])for(const it of g.items||[]){const L=lib[it.file]||{};items.push({file:it.file,title:it.title||L.title||it.file,ans:!!(it.ans||L.ans)||/_ans|answers/.test(it.file),kind:g.kind,glabel:g.label||KIND[g.kind]||'',step:L.step})}
+      const st=checks.map(([c,l])=>({l,on:!!ck[src.ck(id,s,c)]}));
+      return{id:s.id,label:s.label||s.id,title:s.title||'',cur:!!s.cur,steps:(s.steps||s.units||[]).map(x=>steps[x]||x),items,st,done:st.length>0&&st.every(x=>x.on)};
+    });
+    const upd=d.updated||common.updated||'';
+    return{src,id,name:d.name||id,longName:d.longName||'',grade:gradeOf(src,id,d),now:d.now?{text:d.now.text||'',step:steps[d.now.step]||''}:null,
+      sets,cur:sets.find(s=>s.cur)||sets[sets.length-1]||null,log:(d.log||[]).map(x=>({date:x.date||'',text:x.text||''})),upd,
+      url:src.base+'#'+id};
+  });
+}
+async function load(){
+  loading=true;ERR=[];render();
+  const res=await Promise.all(SRC.map(async s=>{try{return await loadSrc(s)}catch(e){ERR.push(s.subj+'の教材サイトを読めませんでした（'+s.base+'）');return[]}}));
+  TR=res.flat();FILES={};
+  for(const t of TR)for(const s of t.sets)for(const it of s.items){if(it.ans||it.kind==='teacher')continue;const key=t.src.id+'/'+it.file;(FILES[key]=FILES[key]||{title:it.title,src:t.src,step:it.step?s.steps[0]:s.steps[0],uses:[]}).uses.push({t,s})}
+  loadedAt=new Date();loading=false;render();
 }
 
+const vis=t=>(!F.subj||t.src.subj===F.subj)&&(!F.grade||t.grade===F.grade);
+function route(){const h=location.hash.slice(1);return h==='log'||h==='find'?h:'now'}
+function toolbar(r){
+  $('#tNow').toggleAttribute('aria-current',r==='now');$('#tLog').toggleAttribute('aria-current',r==='log');$('#tFind').toggleAttribute('aria-current',r==='find');
+  $('#fSubj').innerHTML=`<button type="button" data-s="" aria-pressed="${!F.subj}">全教科</button>`+SRC.map(s=>`<button type="button" data-s="${s.subj}" data-k="${s.k}" aria-pressed="${F.subj===s.subj}">${s.subj}</button>`).join('');
+  const gs=GRADES.filter(g=>TR.some(t=>t.grade===g));
+  $('#fGrade').innerHTML=`<button type="button" data-g="" aria-pressed="${!F.grade}">全学年</button>`+gs.map(g=>`<button type="button" data-g="${g}" aria-pressed="${F.grade===g}">${g}</button>`).join('');
+  $('#loadedAt').textContent=loadedAt?loadedAt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})+' に読み込み':'';
+}
 function render(){
   const r=route();toolbar(r);const m=$('#main');
-  warn(r);
-  m.innerHTML=r.v==='student'?vStudent(r.id):r.v==='sheets'?vSheets():vBoard();
+  if(loading&&!TR.length){m.innerHTML='<p class="hint">教材サイトから読み込み中…</p>';return}
+  const err=ERR.length?`<div class="err">${ERR.map(esc).join('<br>')}</div>`:'';
+  if(r==='find'){
+    if(!$('#q')){m.innerHTML=err+`<input type="search" id="q" placeholder="プリント名・単元でさがす（例：比例、否定文）" value="${esc(Q)}"><div id="fr"></div>`;$('#q').addEventListener('input',e=>{Q=e.target.value;$('#fr').innerHTML=vFind()})}
+    $('#fr').innerHTML=vFind();return;
+  }
+  m.innerHTML=err+(r==='log'?vLog():vNow());
 }
 
-function rowB(r){
-  const d=days(r.assigned),age=(r.status==='doing'||r.status==='todo')&&d>=7?`<span class="age${d>=14?' warn':''}">${d}日</span>`:'';
-  const u=unitOf(r);
-  return `<li class="rec st-${esc(r.status)}"><button class="stamp" data-act="cycle" data-r="${esc(r.id)}" aria-label="状態を進める（いま：${esc((ST[r.status]||ST.todo).l)}）">${(ST[r.status]||ST.todo).s}</button><button class="tt" data-act="rec" data-r="${esc(r.id)}">${esc(ttl(r))}${u?`<small>${esc(u)}</small>`:''}</button>${age}</li>`;
+function card(t){
+  const c=t.cur,u=days(t.upd);
+  const prints=c?c.items.filter(it=>!it.ans&&it.kind!=='teacher'):[];
+  const lg=t.log[0];
+  return `<article class="card" data-k="${t.src.k}">
+  <header><span class="nm">${esc(t.name)}</span><span class="sj">${esc(t.src.subj)}</span>${u!==null?`<span class="upd${u>=14?' warn':''}">${md(t.upd)} 更新${u>=1?`（${u}日前）`:''}</span>`:''}${t.longName&&t.longName!==t.name?`<span class="ln" style="flex-basis:100%">${esc(t.longName)}</span>`:''}</header>
+  ${t.now&&t.now.text?`<div class="now"><span class="lbl">今ここ</span><p>${esc(t.now.text)}</p>${t.now.step?`<span class="step">${esc(t.now.step)}</span>`:''}</div>`:''}
+  ${c?`<div class="cur"><h3><span class="lb">${esc(c.label)}</span><span>${esc(c.title)}</span></h3>${!t.now&&c.steps.length?`<span class="step" style="font-size:13px;color:var(--sub)">${esc(c.steps.join('・'))}</span>`:''}
+    ${c.st.length?`<div class="stamps">${c.st.map(x=>`<span class="st${x.on?' on':''}"><b>済</b>${esc(x.l)}</span>`).join('')}</div>`:''}
+    ${prints.length?`<ul class="prints">${prints.map(it=>`<li><span class="k">${esc(KIND[it.kind]||it.glabel)}</span><span>${esc(it.title)}</span></li>`).join('')}</ul>`:''}</div>`:'<p class="empty">まだ教材がありません</p>'}
+  ${t.sets.length>1?`<div class="hist"><div class="chips">${t.sets.map(s=>`<span class="chip${s.cur?' cur':s.done?' done':''}" title="${esc(s.title)}">${esc(s.label)}${s.done&&!s.cur?' 済':''}</span>`).join('')}</div></div>
+  <details><summary>これまでの回（${t.sets.length}）</summary><ul class="hl">${t.sets.slice().reverse().map(s=>`<li><span class="lb">${esc(s.label)}</span><span class="t">${esc(s.title)}${s.cur?'（今）':''}</span>${s.done?'<span class="ok">済</span>':''}</li>`).join('')}</ul></details>`:''}
+  ${lg?`<p class="log1">${md(lg.date)}　${esc(lg.text)}</p>`:''}
+  <a class="open" href="${esc(t.url)}">教材サイトで開く →</a></article>`;
 }
-function subBlock(s,x){
-  const rs=recsOf(s.id,x);
-  const act=rs.filter(r=>r.status!=='done').sort((a,b)=>ORD[a.status]-ORD[b.status]||String(a.assigned||'').localeCompare(String(b.assigned||'')));
-  const done=rs.filter(r=>r.status==='done').sort((a,b)=>String(b.done||'').localeCompare(String(a.done||'')));
-  return `<section class="sb" data-k="${kOf(x)}"><h3><span>${esc(x)}</span><small>済 ${done.length}枚</small><button class="add" type="button" data-act="assign" data-s="${esc(s.id)}" data-x="${esc(x)}">＋ 渡す</button></h3>
-  <ul>${act.map(rowB).join('')||'<li class="none">いま渡しているプリントはありません</li>'}</ul>
-  ${done[0]?`<p class="last">最近の済：${esc(ttl(done[0]))} <span>${md(done[0].done)}</span></p>`:''}</section>`;
+function vNow(){
+  const list=TR.filter(vis);
+  if(!list.length)return '<p class="hint">この条件の組はありません</p>';
+  return GRADES.filter(g=>list.some(t=>t.grade===g)).map(g=>{const a=list.filter(t=>t.grade===g);return `<section class="grade"><h2>${g}<small>${a.length}組</small></h2><div class="grid">${a.map(card).join('')}</div></section>`}).join('');
 }
-function vBoard(){
-  const all=S.students.slice().sort(byStu);
-  if(!all.length)return `<div class="hero"><h2>まず生徒を登録しましょう</h2><p>呼び名・学年・教科を入れると、生徒ごとの進度カードができます。</p><button class="btn" type="button" data-act="newStudent">＋ 生徒を追加</button></div>`;
-  const list=all.filter(s=>!s.archived&&(!F.grade||s.grade===F.grade)&&(!F.subj||(s.subjects||[]).includes(F.subj)));
-  const arch=all.filter(s=>s.archived);
-  const cards=list.map(s=>{const subs=(s.subjects||[]).filter(x=>!F.subj||x===F.subj);
-    return `<article class="card"><header><a class="nm" href="#s-${esc(s.id)}">${esc(s.name)}</a><span class="gr">${esc(s.grade)}</span>${s.memo?`<span class="memo">${esc(s.memo)}</span>`:''}</header>${subs.map(x=>subBlock(s,x)).join('')||'<p class="empty" style="padding:0 14px 12px">教科が未設定です</p>'}</article>`}).join('');
-  return `<div class="grid">${cards||'<p class="empty">この条件の生徒はいません</p>'}</div>${arch.length?`<p class="arch">卒業・お休み中：${arch.map(s=>`<a href="#s-${esc(s.id)}">${esc(s.name)}</a>`).join('')}</p>`:''}`;
+function vLog(){
+  const rows=[];
+  for(const t of TR.filter(vis))for(const l of t.log)rows.push({...l,t});
+  rows.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const noLog=TR.filter(vis).filter(t=>!t.log.length).map(t=>t.name);
+  return (rows.length?`<ul class="tl">${rows.slice(0,150).map(r=>`<li data-k="${r.t.src.k}"><span class="d">${md(r.date)}</span><span class="w">${esc(r.t.name)}</span><span class="x">${esc(r.text)}</span></li>`).join('')}</ul>`:'<p class="hint">記録はまだありません</p>')
+   +(noLog.length?`<p class="hint">記録（log）を書いていない組：${noLog.map(esc).join('、')}。教材サイトの組のデータに log を書くと、ここに並びます。</p>`:'');
 }
-function vStudent(id){
-  const s=stu(id);if(!s)return '<p class="empty">この生徒は見つかりません。<a href="#board">ボードにもどる</a></p>';
-  const rs=recsOf(id),cnt=k=>rs.filter(r=>r.status===k).length;
-  const subs=[...new Set([...(s.subjects||[]),...rs.map(r=>r.subject)])].filter(Boolean);
-  const tbl=x=>{const list=recsOf(id,x).sort((a,b)=>(a.status==='done')-(b.status==='done')||String(b.done||b.assigned||'').localeCompare(String(a.done||a.assigned||'')));
-    return `<div data-k="${kOf(x)}"><h3 class="tbl-h">${esc(x)}<button class="add" type="button" data-act="assign" data-s="${esc(id)}" data-x="${esc(x)}">＋ 渡す</button></h3>
-    ${list.length?`<table class="stack"><thead><tr><th>状態</th><th>プリント</th><th>渡した日</th><th>済の日</th><th>点数・メモ</th></tr></thead><tbody>${list.map(r=>`<tr class="st-${esc(r.status)}"><td><button class="stamp" data-act="cycle" data-r="${esc(r.id)}" aria-label="状態を進める">${(ST[r.status]||ST.todo).s}</button></td><td><button class="tt" data-act="rec" data-r="${esc(r.id)}">${esc(ttl(r))}${unitOf(r)?`<small>${esc(unitOf(r))}</small>`:''}</button></td><td class="d">${md(r.assigned)}</td><td class="d">${md(r.done)}</td><td>${esc([r.score,r.memo].filter(Boolean).join('　'))}</td></tr>`).join('')}</tbody></table>`:'<p class="empty">まだ記録がありません</p>'}</div>`};
-  return `<div class="shead"><a class="back" href="#board">← ボードにもどる</a><h2>${esc(s.name)}</h2><span class="gr">${esc(s.grade)}</span>${s.archived?'<span class="gr">お休み中</span>':''}<button class="btn ghost" type="button" data-act="editStudent" data-s="${esc(id)}">編集</button>
-  <div class="sum"><span>済 <b>${cnt('done')}</b>枚</span><span>取り組み中 <b>${cnt('doing')}</b></span><span>次 <b>${cnt('todo')}</b></span><span>やり直し <b>${cnt('redo')}</b></span></div>${s.memo?`<p class="memo">${esc(s.memo)}</p>`:''}</div>
-  ${subs.map(tbl).join('')||'<p class="empty">教科が未設定です。「編集」から教科を選んでください。</p>'}`;
-}
-function vSheets(){
-  const ql=Q.trim().toLowerCase();
-  const list=S.sheets.filter(sh=>(!F.subj||sh.subject===F.subj)&&(!F.grade||sh.grade===F.grade)&&(!ql||(String(sh.title)+' '+String(sh.unit||'')).toLowerCase().includes(ql)))
-    .sort((a,b)=>SUBJ.indexOf(a.subject)-SUBJ.indexOf(b.subject)||GRADES.indexOf(a.grade)-GRADES.indexOf(b.grade)||String(a.unit||'').localeCompare(String(b.unit||''),'ja')||String(a.title).localeCompare(String(b.title),'ja'));
-  if(!S.sheets.length)return `<div class="hero"><h2>プリントはまだ登録されていません</h2><p>生徒にプリントを「渡す」と、ここに自動で登録されます。先にまとめて登録しておくこともできます。</p><button class="btn" type="button" data-act="newSheet">＋ プリントを登録</button></div>`;
-  if(!list.length)return '<p class="empty">この条件のプリントはありません</p>';
-  const groups={};list.forEach(sh=>{const k=(sh.subject||'')+'・'+(sh.grade||'');(groups[k]=groups[k]||[]).push(sh)});
-  return Object.entries(groups).map(([k,arr])=>`<section class="grp" data-k="${kOf(arr[0].subject)}"><h2>${esc(k)}</h2><ul class="sheets">${arr.map(sh=>{
-    const rs=S.records.filter(r=>r.sheetId===sh.id).map(r=>({r,s:stu(r.studentId)})).filter(o=>o.s).sort((a,b)=>byStu(a.s,b.s));
-    return `<li><div class="sh"><button class="tt" type="button" data-act="sheet" data-id="${esc(sh.id)}">${esc(sh.title)}${sh.unit?`<small>${esc(sh.unit)}</small>`:''}</button></div><div class="who">${rs.map(o=>`<button type="button" class="st-${esc(o.r.status)}" data-act="rec" data-r="${esc(o.r.id)}"><b>${(ST[o.r.status]||ST.todo).s}</b>${esc(o.s.name)}</button>`).join('')||'<span class="none">まだだれにも渡していません</span>'}</div><button class="add" type="button" data-act="assign" data-sh="${esc(sh.id)}">渡す</button></li>`}).join('')}</ul></section>`).join('');
+function vFind(){
+  const q=Q.trim().toLowerCase();
+  if(!q)return '<p class="hint">プリントの名前や単元を入れると、そのプリントを「どの組が・何回目に」使ったかが出ます。</p>';
+  const hits=Object.values(FILES).filter(f=>(!F.subj||f.src.subj===F.subj)&&(f.title+' '+(f.step||'')).toLowerCase().includes(q)).slice(0,80);
+  if(!hits.length)return '<p class="hint">見つかりませんでした</p>';
+  return `<ul class="res">${hits.map(f=>`<li data-k="${f.src.k}"><div class="t">${esc(f.title)}</div><div class="m">${esc(f.src.subj)}${f.step?'・'+esc(f.step):''}</div><div class="chips">${f.uses.filter(u=>!F.grade||u.t.grade===F.grade).map(u=>`<span class="chip${u.s.cur?' cur':u.s.done?' done':''}">${esc(u.t.name)} ${esc(u.s.label)}${u.s.cur?'（今）':u.s.done?' 済':''}</span>`).join('')}</div></li>`).join('')}</ul>`;
 }
 
-/* ---------- dialogs ---------- */
-const M=$('#modal');
-function openModal(html,{submit,remove,change}={}){
-  M.innerHTML=`<form class="panel" novalidate>${html}</form>`;M.hidden=false;
-  const f=M.firstElementChild;
-  f.addEventListener('submit',async ev=>{ev.preventDefault();const b=f.querySelector('.pri');if(b)b.disabled=true;const ok=await submit(f);if(ok===false){if(b)b.disabled=false;return}closeModal()});
-  f.addEventListener('click',async ev=>{
-    if(ev.target.closest('[data-close]'))return closeModal();
-    const d=ev.target.closest('.del');if(!d)return;
-    if(!d.dataset.armed){d.dataset.armed='1';d.textContent='もう一度押すと削除';return}
-    d.disabled=true;await remove(f);closeModal();
-  });
-  if(change)f.addEventListener('change',ev=>change(ev,f));
-  return f;
-}
-function closeModal(){M.hidden=true;M.innerHTML='';render()}
-M.addEventListener('click',e=>{if(e.target===M)closeModal()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!M.hidden)closeModal()});
-const btns=(withDel,label='保存')=>`<div class="btns">${withDel?'<button type="button" class="del">削除</button>':''}<span></span><button type="button" class="btn ghost" data-close>やめる</button><button class="btn pri">${label}</button></div>`;
-const opts=(arr,cur)=>arr.map(v=>`<option${v===cur?' selected':''}>${esc(v)}</option>`).join('');
-
-function openStudent(id){
-  const s=id?stu(id):{name:'',grade:F.grade||'中1',subjects:F.subj?[F.subj]:['英語','数学'],memo:'',archived:false};
-  openModal(`<h2>${id?'生徒を編集':'生徒を追加'}</h2>
-  <label>呼び名<input type="text" name="nick" value="${esc(s.name)}" autocomplete="off" placeholder="例：U、Kさん"></label>
-  <p class="hint">本名ではなく、イニシャルや呼び名がおすすめです。</p>
-  <label>学年<select name="grade">${opts(GRADES,s.grade)}</select></label>
-  <fieldset><legend>教科</legend><div class="chips">${SUBJ.map(x=>`<label class="chip" data-k="${kOf(x)}"><input type="checkbox" name="subj" value="${x}"${(s.subjects||[]).includes(x)?' checked':''}>${x}</label>`).join('')}</div></fieldset>
-  <label>メモ<input type="text" name="memo" value="${esc(s.memo)}" placeholder="例：週2（月・木）、宿題あり"></label>
-  ${id?`<label class="check"><input type="checkbox" name="archived"${s.archived?' checked':''}> 卒業・お休み中（ボードに出さない）</label>`:''}
-  ${btns(!!id)}`,{
-    submit:async f=>{const fd=new FormData(f),name=String(fd.get('nick')||'').trim();if(!name){note('呼び名を入れてください');return false}
-      return put('students',id||nid('s'),{name,grade:fd.get('grade'),subjects:fd.getAll('subj'),memo:String(fd.get('memo')||'').trim(),archived:!!fd.get('archived'),updatedAt:Date.now()})},
-    remove:async()=>{for(const r of recsOf(id))await del('records',r.id);await del('students',id);location.hash='#board'}
-  });
-}
-function openSheet(id){
-  const sh=id?sht(id):{title:'',subject:F.subj||'数学',grade:F.grade||'中1',unit:'',memo:''};
-  openModal(`<h2>${id?'プリントを編集':'プリントを登録'}</h2>
-  <label>プリント名<input type="text" name="title" value="${esc(sh.title)}" autocomplete="off" placeholder="例：方程式 総復習プリント アルファ"></label>
-  <div class="two"><label>教科<select name="subject">${opts(SUBJ,sh.subject)}</select></label><label>学年<select name="grade">${opts(GRADES,sh.grade)}</select></label></div>
-  <label>単元<input type="text" name="unit" value="${esc(sh.unit)}" placeholder="例：1次方程式"></label>
-  <label>メモ<input type="text" name="memo" value="${esc(sh.memo)}" placeholder="例：A〜Dの4パターン"></label>
-  ${btns(!!id)}`,{
-    submit:async f=>{const fd=new FormData(f),title=String(fd.get('title')||'').trim();if(!title){note('プリント名を入れてください');return false}
-      return put('sheets',id||nid('p'),{title,subject:fd.get('subject'),grade:fd.get('grade'),unit:String(fd.get('unit')||'').trim(),memo:String(fd.get('memo')||'').trim(),updatedAt:Date.now()})},
-    remove:async()=>{const t=sh.title,u=sh.unit;for(const r of S.records.filter(r=>r.sheetId===id))await upd('records',r.id,{sheetId:'',title:t,unit:u});await del('sheets',id)}
-  });
-}
-function openAssign({sid,subj,sheetId}){
-  const sh0=sheetId&&sht(sheetId);subj=sh0?sh0.subject:(subj||F.subj||SUBJ[0]);
-  const s0=sid&&stu(sid),g0=sh0?sh0.grade:(s0?s0.grade:(F.grade||'中1'));
-  const stuChips=x=>S.students.filter(s=>!s.archived).sort((a,b)=>((b.subjects||[]).includes(x))-((a.subjects||[]).includes(x))||byStu(a,b)).map(s=>`<label class="chip" data-k="${kOf(x)}"><input type="checkbox" name="sid" value="${esc(s.id)}"${s.id===sid?' checked':''}>${esc(s.name)}<small>${esc(s.grade)}</small></label>`).join('');
-  const shOpts=x=>'<option value="">（新しいプリントを登録して渡す）</option>'+S.sheets.filter(p=>p.subject===x).sort((a,b)=>GRADES.indexOf(a.grade)-GRADES.indexOf(b.grade)||String(a.unit||'').localeCompare(String(b.unit||''),'ja')||String(a.title).localeCompare(String(b.title),'ja')).map(p=>`<option value="${esc(p.id)}"${p.id===sheetId?' selected':''}>${esc(p.grade)}｜${esc(p.unit?p.unit+'｜':'')}${esc(p.title)}</option>`).join('');
-  openModal(`<h2>プリントを渡す</h2>
-  <label>教科<select name="subject">${opts(SUBJ,subj)}</select></label>
-  <fieldset><legend>だれに</legend><div class="chips" id="aStu">${stuChips(subj)||'<span class="none">先に生徒を登録してください</span>'}</div></fieldset>
-  <label>プリント<select name="sheet" id="aSheet">${shOpts(subj)}</select></label>
-  <div id="aNew"${sh0?' hidden':''} style="display:grid;gap:10px"><label>新しいプリント名<input type="text" name="title" autocomplete="off" placeholder="例：正負の数 ごちゃまぜ計算 B"></label>
-  <div class="two"><label>単元<input type="text" name="unit" placeholder="例：正負の数"></label><label>学年<select name="grade">${opts(GRADES,g0)}</select></label></div></div>
-  <fieldset><legend>状態</legend><div class="chips">${['todo','doing','done'].map(k=>`<label class="chip"><input type="radio" name="status" value="${k}"${k==='doing'?' checked':''}>${ST[k].l}</label>`).join('')}</div></fieldset>
-  <label>日付<input type="date" name="date" value="${today()}"></label>
-  ${btns(false,'渡す')}`,{
-    change:(ev,f)=>{
-      if(ev.target.name==='subject'){const x=ev.target.value,keep=new FormData(f).getAll('sid');f.querySelector('#aStu').innerHTML=stuChips(x);f.querySelectorAll('[name=sid]').forEach(i=>i.checked=keep.includes(i.value));f.querySelector('#aSheet').innerHTML=shOpts(x);f.querySelector('#aNew').hidden=false}
-      if(ev.target.name==='sheet')f.querySelector('#aNew').hidden=!!ev.target.value;
-    },
-    submit:async f=>{
-      const fd=new FormData(f),sids=fd.getAll('sid'),x=fd.get('subject'),st=fd.get('status'),date=fd.get('date')||today();
-      if(!sids.length){note('生徒を選んでください');return false}
-      let pid=fd.get('sheet'),p=pid&&sht(pid);
-      if(!p){const title=String(fd.get('title')||'').trim();if(!title){note('プリント名を入れてください');return false}
-        pid=nid('p');p={title,subject:x,grade:fd.get('grade'),unit:String(fd.get('unit')||'').trim(),memo:'',updatedAt:Date.now()};if(!await put('sheets',pid,p))return false}
-      for(const s of sids)await put('records',nid('r'),{studentId:s,sheetId:pid,title:p.title,unit:p.unit||'',subject:x,status:st,assigned:date,done:st==='done'?date:'',score:'',memo:'',updatedAt:Date.now()});
-      note(sids.length+'人に渡しました');
-    }
-  });
-}
-function openRec(id){
-  const r=S.records.find(x=>x.id===id);if(!r)return;const s=stu(r.studentId);
-  openModal(`<h2>${esc(ttl(r))}</h2><p class="hint" style="margin:0">${esc(s?s.name:'')}・${esc(r.subject)}${unitOf(r)?'・'+esc(unitOf(r)):''}</p>
-  <fieldset><legend>状態</legend><div class="chips">${['todo','doing','done','redo'].map(k=>`<label class="chip"><input type="radio" name="status" value="${k}"${k===r.status?' checked':''}>${ST[k].l}</label>`).join('')}</div></fieldset>
-  <div class="two"><label>渡した日<input type="date" name="assigned" value="${esc(r.assigned)}"></label><label>済の日<input type="date" name="done" value="${esc(r.done)}"></label></div>
-  <label>点数・正答数<input type="text" name="score" value="${esc(r.score)}" placeholder="例：18/20"></label>
-  <label>メモ<textarea name="memo" rows="2" placeholder="例：分数の移項でつまずく">${esc(r.memo)}</textarea></label>
-  ${btns(true)}`,{
-    change:(ev,f)=>{if(ev.target.name==='status'&&ev.target.value==='done'&&!f.done.value)f.done.value=today()},
-    submit:async f=>{const fd=new FormData(f);let st=fd.get('status'),dn=fd.get('done')||'';if(st==='done'&&!dn)dn=today();
-      return upd('records',id,{status:st,assigned:fd.get('assigned')||'',done:dn,score:String(fd.get('score')||'').trim(),memo:String(fd.get('memo')||'').trim(),updatedAt:Date.now()})},
-    remove:async()=>{await del('records',id)}
-  });
-}
-async function cycle(id){
-  const r=S.records.find(x=>x.id===id);if(!r)return;
-  if(r.status==='done')return openRec(id);
-  const next={todo:'doing',doing:'done',redo:'doing'}[r.status]||'doing';
-  const ch={status:next,updatedAt:Date.now()};if(next==='done')ch.done=today();
-  if(await upd('records',id,ch)&&next==='done')note(`「${ttl(r)}」に済のはんこを押しました`);
-}
-
-document.addEventListener('click',e=>{
-  const b=e.target.closest('[data-act]');if(!b||M.contains(b))return;const a=b.dataset.act;
-  if(a==='cycle')cycle(b.dataset.r);else if(a==='rec')openRec(b.dataset.r);
-  else if(a==='assign')openAssign({sid:b.dataset.s,subj:b.dataset.x,sheetId:b.dataset.sh});
-  else if(a==='newStudent')openStudent();else if(a==='editStudent')openStudent(b.dataset.s);
-  else if(a==='newSheet')openSheet();else if(a==='sheet')openSheet(b.dataset.id);
-  else if(a==='export')exportData();
-});
-$('#addStudent').addEventListener('click',()=>openStudent());
-$('#addSheet').addEventListener('click',()=>openSheet());
-$('#fGrade').addEventListener('change',e=>{F.grade=e.target.value;saveF();render()});
-$('#fSubj').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F.subj=b.dataset.x;saveF();render()});
-$('#fQ').addEventListener('input',e=>{Q=e.target.value;render()});
+$('#fSubj').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F.subj=b.dataset.s;saveF();render()});
+$('#fGrade').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F.grade=b.dataset.g;saveF();render()});
+$('#reload').addEventListener('click',load);
 addEventListener('hashchange',()=>{render();scrollTo(0,0)});
-
-function warn(r){
-  const w=$('#warn'),d=S.lastExport?days(S.lastExport):null,has=S.records.length+S.students.length>0;
-  const show=has&&r.v!=='student'&&(d===null||d>=14);
-  w.hidden=!show;if(show)w.innerHTML=`<span>${d===null?'まだバックアップしていません。':'最後のバックアップから'+d+'日たっています。'}データはこの端末の中だけにあるので、ときどき書き出してください。</span><button class="btn" type="button" data-act="export">書き出す</button>`;
-}
-function openSettings(){
-  const f=openModal(`<h2>設定</h2>
-  <h3>バックアップ</h3><p class="setp">データはこの端末のブラウザの中だけに保存されています（GitHubには送られません）。iPadとPCでは別々のデータになります。もしもの時のために、ときどき書き出してファイルアプリやiCloud Driveに保存してください。</p>
-  <div class="btns"><button type="button" class="btn" data-x="export">書き出す</button><label class="btn ghost" style="display:inline-flex!important;align-items:center;font-size:16px!important">読み込む<input type="file" id="imp" accept=".json,application/json" hidden></label></div>
-  <p class="setp">最後に書き出した日：${S.lastExport?md(S.lastExport):'まだ'}　／　生徒 ${S.students.length}人・プリント ${S.sheets.length}枚・記録 ${S.records.length}件</p>
-  <p class="setp" id="impMsg"></p>
-  <h3>ホーム画面に追加</h3><p class="setp">Safariの共有ボタン →「ホーム画面に追加」で、アプリのように使えます。データも消えにくくなるので、この使い方がおすすめです。</p>
-  <h3>すべて削除</h3><div class="btns"><button type="button" class="del">全データを削除</button><span></span><button type="button" class="btn ghost" data-close>閉じる</button></div>`,{
-    remove:async()=>{S=blank();save();note('削除しました')},
-    change:(ev,f)=>{if(ev.target.id==='imp'){importData(ev.target.files[0],f);ev.target.value=''}}
-  });
-  f.addEventListener('click',ev=>{if(ev.target.closest('[data-x=export]'))exportData()});
-}
-let pending=null;
-function importData(file,f){
-  if(!file)return;const rd=new FileReader();
-  rd.onload=()=>{let d;try{d=JSON.parse(rd.result);if(!d||!Array.isArray(d.students)||!Array.isArray(d.records))throw 0}catch(e){note('このファイルは読み込めません');return}
-    pending=d;const m=f.querySelector('#impMsg');m.innerHTML=`ファイルの中身：生徒 ${d.students.length}人・記録 ${d.records.length}件。今のデータをこの内容に置きかえます。 <button type="button" class="btn" id="impGo">置きかえる</button>`;
-    m.querySelector('#impGo').addEventListener('click',()=>{S={...blank(),...pending};pending=null;save();closeModal();note('読み込みました')});
-  };rd.readAsText(file);
-}
-async function exportData(){
-  const name=`shindo-board-${today()}.json`,file=new File([JSON.stringify(S)],name,{type:'application/json'});
-  try{
-    if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title:name});
-    else{const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),10000)}
-    S.lastExport=today();save();if(M.hidden)render();note('書き出しました');
-  }catch(e){if(e&&e.name!=='AbortError')note('書き出せませんでした')}
-}
-$('#openSet').addEventListener('click',openSettings);
-try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-render();
+addEventListener('pageshow',e=>{if(e.persisted)load()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&loadedAt&&Date.now()-loadedAt>60000)load()});
+load();
 }
 </script>
 </body>
