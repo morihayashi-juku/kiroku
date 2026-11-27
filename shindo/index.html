@@ -386,13 +386,13 @@ function openSettings(lead){
   const f=openModal(`<h2>設定：書きこみの鍵</h2>${lead?`<p class="mh"><b>${esc(lead)}</b></p>`:''}
   <p class="mh">今：${has?'<b>鍵が入っています</b>（この端末だけ）':'鍵は入っていません'}</p>
   <details class="howto"${has?'':' open'}><summary>鍵の作り方（最初の1回だけ）</summary><ol>
-   <li>このiPadのSafariで <a href="https://github.com/settings/personal-access-tokens/new">GitHub の「新しい鍵を作る」ページ</a> を開く（ログインを聞かれたらログイン）。</li>
-   <li><b>Token name</b>：「進度ボード」。<b>Expiration</b>：Custom で1年後の日付。</li>
+   <li>この端末のブラウザで <a href="https://github.com/settings/personal-access-tokens/new">GitHub の「新しい鍵を作る」ページ</a> を開く（ログインを聞かれたらログイン）。</li>
+   <li><b>Token name</b>：「進度ボード（iPad）」「進度ボード（Mac）」のように、端末の名前を入れる。<b>Expiration</b>：Custom で1年後の日付。</li>
    <li><b>Resource owner</b>：morihayashi-juku のまま。</li>
    <li><b>Repository access</b>：「Only select repositories」→ <b>sugaku</b> と <b>eigo</b> の2つを選ぶ。</li>
    <li><b>Permissions</b> →「Repository permissions」→ <b>Contents</b> を「<b>Read and write</b>」にする（Metadata は自動で Read-only になる）。</li>
    <li>いちばん下の <b>Generate token</b> → 出てきた <code>github_pat_</code> で始まる文字をコピーして、下に貼る。この文字は二度と表示されないので、ここに貼ったら閉じてよい。</li>
-  </ol><p class="mh">鍵はこのiPadの中だけにしまわれ、GitHubのページには載りません。iPadをなくしたときは、GitHub の Settings → Developer settings → Fine-grained tokens で「進度ボード」を Delete してください。</p></details>
+  </ol><p class="mh">鍵はこの端末のこのブラウザの中だけにしまわれ、GitHubのページには載りません。端末をなくしたときは、GitHub の Settings → Developer settings → Fine-grained tokens で、その端末の鍵を Delete してください。</p></details>
   <label>鍵（github_pat_…）<input type="password" name="tk" autocomplete="off" placeholder="${has?'入れ直すときだけ貼る':'ここに貼る'}"></label>
   <div class="mb">${has?'<button type="button" class="btn" id="tkDel">鍵を消す</button>':''}<button type="button" class="btn" data-close>閉じる</button><button class="btn pri">保存して確かめる</button></div>`,async f=>{
     const v=f.tk.value.trim();if(!v){if(has)return;throw new Error('鍵を貼ってください')}
