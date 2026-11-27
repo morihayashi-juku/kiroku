@@ -40,11 +40,15 @@ a{color:inherit}
 .tabs{display:flex;background:var(--soft);border-radius:12px;padding:3px}
 .tabs a{padding:8px 12px;border-radius:9px;text-decoration:none;font-weight:700;font-size:15px;min-height:40px;display:flex;align-items:center;white-space:nowrap}
 .tabs a[aria-current]{background:var(--paper);box-shadow:0 1px 3px rgb(0 0 0/.12)}
-.row2{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
-.seg{display:flex;gap:4px;flex-wrap:wrap}
-.seg button{border:1px solid var(--rule);background:var(--paper);border-radius:999px;padding:6px 12px;min-height:38px;cursor:pointer;font-size:15px}
-.seg button[aria-pressed=true]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:var(--paper);font-weight:700}
-.stamp-t{margin-left:auto;font-size:13px;color:var(--sub);display:flex;gap:8px;align-items:center}
+.rt{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.stamp-t{font-size:13px;color:var(--sub);display:flex;gap:4px;align-items:center}
+.lk{background:none;border:0;color:var(--en);font-weight:700;font-size:14px;padding:6px 8px;min-height:36px;cursor:pointer}
+.gtabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(max-content,1fr);gap:3px;margin-top:10px;background:var(--soft);border-radius:14px;padding:4px;overflow-x:auto;scrollbar-width:none}
+.gtabs::-webkit-scrollbar{display:none}
+.gtabs button{border:0;background:transparent;border-radius:10px;min-height:46px;padding:4px 12px;font:700 17px "Zen Maru Gothic","BIZ UDPGothic",sans-serif;color:var(--sub);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;white-space:nowrap}
+.gtabs button small{font:12px "BIZ UDPGothic",sans-serif;margin-top:2px}
+.gtabs button[aria-pressed=true]{background:var(--paper);color:var(--ink);box-shadow:0 1px 4px rgb(0 0 0/.15)}
+.gtabs button.tdy[aria-pressed=true]{background:var(--ink);color:var(--paper)}
 .btn{border:0;border-radius:10px;padding:8px 12px;min-height:40px;font-weight:700;cursor:pointer;background:var(--soft);color:var(--ink)}
 input[type=search]{border:1px solid var(--rule);background:var(--paper);border-radius:10px;padding:8px 12px;min-height:46px;font-size:16px;width:100%}
 :focus-visible{outline:3px solid var(--en);outline-offset:2px}
@@ -129,19 +133,16 @@ main{padding:16px max(3vw,12px) 40px;max-width:1240px;margin:0 auto}
 .res .chips{margin-top:6px}
 .hint{color:var(--sub);font-size:14px}
 footer{color:var(--sub);font-size:13px;text-align:center;padding:0 16px 30px;max-width:760px;margin:0 auto;line-height:1.7}
-@media(max-width:600px){.row>summary{grid-template-columns:4.6em 1fr auto;gap:8px;padding:10px}.who b{font-size:17px}.more{padding-left:14px}.today{flex-basis:100%}.dt{font-size:26px}.tl li{grid-template-columns:4.6em 1fr}.sched{min-width:0}}
+@media(max-width:600px){.rt{align-items:stretch;flex-basis:100%}.gtabs button{font-size:15px;padding:4px 10px}.row>summary{grid-template-columns:4.6em 1fr auto;gap:8px;padding:10px}.who b{font-size:17px}.more{padding-left:14px}.today{flex-basis:100%}.dt{font-size:26px}.tl li{grid-template-columns:4.6em 1fr}.sched{min-width:0}}
 @media(prefers-reduced-motion:no-preference){.row[open] .more{animation:in .2s both}@keyframes in{from{opacity:0;transform:translateY(-4px)}}}
 </style></head><body>
 <div class="top">
   <div class="row1">
     <div class="today"><h1>プリント進度ボード</h1><div class="dt" id="todayDt"></div><div class="tc" id="todayCome"></div></div>
-    <nav class="tabs" aria-label="表示の切りかえ"><a href="#now" id="tNow">いまどこ</a><a href="#log" id="tLog">記録</a><a href="#find" id="tFind">プリントをさがす</a></nav>
+    <div class="rt"><nav class="tabs" aria-label="表示の切りかえ"><a href="#now" id="tNow">いまどこ</a><a href="#log" id="tLog">記録</a><a href="#find" id="tFind">プリントをさがす</a></nav>
+    <span class="stamp-t"><span id="loadedAt"></span><button class="lk" id="reload" type="button">最新にする</button><button class="lk" id="openSet" type="button">設定</button></span></div>
   </div>
-  <div class="row2">
-    <div class="seg" id="fSubj" role="group" aria-label="教科でしぼる"></div>
-    <div class="seg" id="fGrade" role="group" aria-label="学年でしぼる"></div>
-    <span class="stamp-t"><span id="loadedAt"></span><button class="btn" id="reload" type="button">最新にする</button><button class="btn" id="openSet" type="button">設定</button></span>
-  </div>
+  <nav class="gtabs" id="fGrade" aria-label="学年で切りかえ"></nav>
 </div>
 <main id="main"><p class="hint">教材サイトから読み込み中…</p></main>
 <footer>この表は、数学・英語の教材サイトのデータ（今ここの回・プリントの一覧・記録）から自動で作っています。教材サイトを更新すれば、ここにも反映されます。<br>はんこ（印刷した・木曜済など）は、教材サイトで付けたチェックです。同じ端末・同じブラウザで開いたときに表示されます。</footer>
@@ -219,13 +220,14 @@ async function load(){
   loadedAt=new Date();loading=false;render();
 }
 
-const vis=t=>(!F.subj||t.src.subj===F.subj)&&(!F.grade||t.grade===F.grade);
+F.subj='';
+const vis=t=>F.grade==='today'?!!(t.next&&t.next.i===0):(!F.grade||t.grade===F.grade);
 function route(){const h=location.hash.slice(1);return h==='log'||h==='find'?h:'now'}
 function toolbar(r){
   $('#tNow').toggleAttribute('aria-current',r==='now');$('#tLog').toggleAttribute('aria-current',r==='log');$('#tFind').toggleAttribute('aria-current',r==='find');
-  $('#fSubj').innerHTML=`<button type="button" data-s="" aria-pressed="${!F.subj}">全教科</button>`+SRC.map(s=>`<button type="button" data-s="${s.subj}" data-k="${s.k}" aria-pressed="${F.subj===s.subj}">${s.subj}</button>`).join('');
   const gs=GRADES.filter(g=>TR.some(t=>t.grade===g));
-  $('#fGrade').innerHTML=`<button type="button" data-g="" aria-pressed="${!F.grade}">全学年</button>`+gs.map(g=>`<button type="button" data-g="${g}" aria-pressed="${F.grade===g}">${g}</button>`).join('');
+  const nT=TR.filter(t=>t.next&&t.next.i===0).length,cnt=g=>TR.filter(t=>t.grade===g).length;
+  $('#fGrade').innerHTML=`<button type="button" class="tdy" data-g="today" aria-pressed="${F.grade==='today'}">今日<small>${nT}組</small></button><button type="button" data-g="" aria-pressed="${!F.grade}">全部<small>${TR.length}組</small></button>`+gs.map(g=>`<button type="button" data-g="${g}" aria-pressed="${F.grade===g}">${g}<small>${cnt(g)}組</small></button>`).join('');
   const n=new Date(),w=n.getDay();
   $('#todayDt').innerHTML=`${n.getMonth()+1}月${n.getDate()}日<span class="w${w===6?' sat':''}"${w>0&&w<6?' style="color:inherit"':''}>（${WD[w]}）</span>`;
   const come=TR.filter(t=>t.next&&t.next.i===0).map(t=>t.name);
@@ -268,7 +270,7 @@ function row(t){
 }
 function vNow(){
   const list=TR.filter(vis);
-  if(!list.length)return '<p class="hint">この条件の組はありません</p>';
+  if(!list.length)return F.grade==='today'?'<p class="hint">今日は授業のある組はありません。「全部」で全部の組が見られます。</p>':'<p class="hint">この条件の組はありません</p>';
   return GRADES.filter(g=>list.some(t=>t.grade===g)).map(g=>{const a=list.filter(t=>t.grade===g);return `<section class="grade"><h2>${g}</h2><div class="rows">${a.map(row).join('')}</div></section>`}).join('')
    +'<p class="hint" style="text-align:center">行をタップすると、プリントの中身とこれまでの回が開きます。</p>';
 }
@@ -287,10 +289,9 @@ function vFind(){
   if(!q)return '<p class="hint">プリントの名前や単元を入れると、そのプリントを「どの組が・何回目に」使ったかが出ます。</p>';
   const hits=Object.values(FILES).filter(f=>(!F.subj||f.src.subj===F.subj)&&(f.title+' '+(f.step||'')).toLowerCase().includes(q)).slice(0,80);
   if(!hits.length)return '<p class="hint">見つかりませんでした</p>';
-  return `<ul class="res">${hits.map(f=>`<li data-k="${f.src.k}"><div class="t">${esc(f.title)}</div><div class="m">${esc(f.src.subj)}${f.step?'・'+esc(f.step):''}</div><div class="chips">${f.uses.filter(u=>!F.grade||u.t.grade===F.grade).map(u=>`<span class="chip${u.s.cur?' cur':u.s.done?' done':''}">${esc(u.t.name)} ${esc(u.s.label)}${u.s.cur?'（今）':u.s.done?' 済':''}</span>`).join('')}</div></li>`).join('')}</ul>`;
+  return `<ul class="res">${hits.map(f=>`<li data-k="${f.src.k}"><div class="t">${esc(f.title)}</div><div class="m">${esc(f.src.subj)}${f.step?'・'+esc(f.step):''}</div><div class="chips">${f.uses.filter(u=>vis(u.t)).map(u=>`<span class="chip${u.s.cur?' cur':u.s.done?' done':''}">${esc(u.t.name)} ${esc(u.s.label)}${u.s.cur?'（今）':u.s.done?' 済':''}</span>`).join('')}</div></li>`).join('')}</ul>`;
 }
 
-$('#fSubj').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F.subj=b.dataset.s;saveF();render()});
 $('#fGrade').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F.grade=b.dataset.g;saveF();render()});
 /* ---------- 書きこみ（GitHub の教材棚へ） ---------- */
 const OWNER='morihayashi-juku',TK='shindo-gh-token',PK='shindo-pending';
