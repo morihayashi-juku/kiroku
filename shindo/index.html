@@ -82,6 +82,26 @@ main{padding:16px max(3vw,12px) 40px;max-width:1240px;margin:0 auto}
 .hl .ok{flex:none;color:var(--stamp);font-weight:700}
 .mm{margin:8px 0 0;font-size:13px;color:var(--sub)}
 .open{display:block;text-align:right;padding:8px 0 10px;font-size:14px;font-weight:700;color:var(--c);text-decoration:none}
+.acts{display:flex;gap:8px;margin:10px 0 4px}
+.acts .btn{border:1px solid var(--rule);background:var(--paper)}
+.abs-b{color:var(--stamp)!important;border-color:var(--stamp)!important}
+.lg{list-style:none;margin:8px 0 0;padding:0;font-size:13px}
+.lg li{display:flex;gap:8px;align-items:center;padding:4px 0;border-top:1px dashed var(--rule)}
+.lg .d{flex:none;color:var(--sub);min-width:4.8em}
+.lg .x{flex:1;display:flex;gap:6px;align-items:center}
+.x-b{flex:none;background:none;border:1px solid var(--rule);border-radius:8px;color:var(--sub);font-size:12px;padding:4px 8px;min-height:32px;cursor:pointer}
+.modal{position:fixed;inset:0;background:rgb(0 0 0/.42);display:grid;place-items:center;z-index:10;padding:12px}
+.panel{background:var(--paper);border-radius:18px;padding:20px;width:min(560px,100%);max-height:calc(100vh - 24px);overflow:auto;display:grid;gap:12px}
+.panel h2{font-size:22px}
+.panel label{display:grid;gap:4px;font-weight:700;font-size:14px}
+.panel input[type=text],.panel input[type=date],.panel input[type=password],.panel textarea{border:1px solid var(--rule);background:var(--paper);border-radius:10px;padding:8px 10px;min-height:44px;font-size:16px;font-family:inherit;color:inherit}
+.mh{margin:0;font-size:14px;color:var(--sub);line-height:1.6}
+.mb{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.pri{background:var(--ink)!important;color:var(--paper)!important}
+.pri:disabled{opacity:.6}
+.err-m{margin:0;color:var(--stamp);font-weight:700;font-size:14px}
+.howto{padding:0;font-size:14px;line-height:1.7}.howto ol{padding-left:1.4em;margin:6px 0}.howto summary{font-weight:700;color:var(--ink)}
+.note{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;font-size:14px;max-width:92vw;z-index:20}
 .err{background:color-mix(in srgb,var(--stamp) 12%,var(--paper));border:1px solid var(--stamp);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:14px}
 .day{margin-bottom:18px;max-width:860px}
 .day h2{font-size:22px;font-weight:900;margin-bottom:6px;display:flex;align-items:baseline;gap:8px;font-variant-numeric:tabular-nums}
@@ -120,11 +140,13 @@ footer{color:var(--sub);font-size:13px;text-align:center;padding:0 16px 30px;max
   <div class="row2">
     <div class="seg" id="fSubj" role="group" aria-label="教科でしぼる"></div>
     <div class="seg" id="fGrade" role="group" aria-label="学年でしぼる"></div>
-    <span class="stamp-t"><span id="loadedAt"></span><button class="btn" id="reload" type="button">最新にする</button></span>
+    <span class="stamp-t"><span id="loadedAt"></span><button class="btn" id="reload" type="button">最新にする</button><button class="btn" id="openSet" type="button">設定</button></span>
   </div>
 </div>
 <main id="main"><p class="hint">教材サイトから読み込み中…</p></main>
 <footer>この表は、数学・英語の教材サイトのデータ（今ここの回・プリントの一覧・記録）から自動で作っています。教材サイトを更新すれば、ここにも反映されます。<br>はんこ（印刷した・木曜済など）は、教材サイトで付けたチェックです。同じ端末・同じブラウザで開いたときに表示されます。</footer>
+<div class="modal" id="modal" hidden></div>
+<div class="note" id="note" hidden role="status"></div>
 <script>
 {
 /* 読みに行く教材サイト。教科を足すときはここに1つ足す */
@@ -149,6 +171,8 @@ let F={subj:'',grade:''},Q='';
 try{Object.assign(F,JSON.parse(localStorage.getItem('shindo-f')||'{}'))}catch(e){}
 const saveF=()=>{try{localStorage.setItem('shindo-f',JSON.stringify(F))}catch(e){}};
 let TR=[],FILES={},ERR=[],loadedAt=null,loading=true;
+const OPEN=new Set();
+function derive(t){t.abs=t.log.filter(isAbs);t.streak=t.log.length>1&&isAbs(t.log[0])&&isAbs(t.log[1])}
 
 const getJ=async u=>{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(r.status+' '+u);return r.json()};
 const shelf=k=>{try{return JSON.parse(localStorage.getItem(k)||'{}')||{}}catch(e){return{}}};
@@ -182,7 +206,7 @@ async function loadSrc(src){
     const upd=d.updated||common.updated||'';
     const dd=d.days||(src.daysFallback||{})[id]||null;
     const log=(d.log||[]).map(x=>({date:x.date||'',text:x.text||''}));
-    return{src,id,dd,next:nextDay(dd),abs:log.filter(isAbs),streak:log.length>1&&isAbs(log[0])&&isAbs(log[1]),name:d.name||id,longName:d.longName||'',grade:gradeOf(src,id,d),now:d.now?{text:d.now.text||'',step:steps[d.now.step]||''}:null,
+    return{src,id,dd,next:nextDay(dd),name:d.name||id,longName:d.longName||'',grade:gradeOf(src,id,d),now:d.now?{text:d.now.text||'',step:steps[d.now.step]||''}:null,
       sets,cur:sets.find(s=>s.cur)||sets[sets.length-1]||null,log,upd,
       url:src.base+'#'+id};
   });
@@ -190,7 +214,7 @@ async function loadSrc(src){
 async function load(){
   loading=true;ERR=[];render();
   const res=await Promise.all(SRC.map(async s=>{try{return await loadSrc(s)}catch(e){ERR.push(s.subj+'の教材サイトを読めませんでした（'+s.base+'）');return[]}}));
-  TR=res.flat();FILES={};
+  TR=res.flat();applyPending();TR.forEach(derive);FILES={};
   for(const t of TR)for(const s of t.sets)for(const it of s.items){if(it.ans||it.kind==='teacher')continue;const key=t.src.id+'/'+it.file;(FILES[key]=FILES[key]||{title:it.title,src:t.src,step:it.step?s.steps[0]:s.steps[0],uses:[]}).uses.push({t,s})}
   loadedAt=new Date();loading=false;render();
 }
@@ -227,7 +251,8 @@ function row(t){
   const lg=t.log[0],showLog=lg&&!norm(now+(c&&c.title)).includes(norm(lg.text).slice(0,12));
   const on=c?c.st.filter(x=>x.on):[];
   const recentAbs=t.abs.filter(a=>{const n=days(a.date);return n!==null&&n<=14}).slice(0,2);
-  return `<details class="row${t.next&&t.next.i===0?' is-today':''}${t.streak?' streak':''}" data-k="${t.src.k}">
+  const key=t.src.id+'/'+t.id;
+  return `<details class="row${t.next&&t.next.i===0?' is-today':''}${t.streak?' streak':''}" data-k="${t.src.k}" data-key="${esc(key)}"${OPEN.has(key)?' open':''}>
   <summary><span class="who"><b>${esc(t.name)}</b><span class="sj">${esc(t.src.subj)}</span></span>
    <span class="what">${c?`<span class="lb">${esc(c.label)}</span><span class="tt">${esc(c.title)}</span>`:'<span class="tt none">まだ教材がありません</span>'}${now?`<span class="nw">${esc(now)}</span>`:''}${t.streak?'<span class="sk">2回続けて休み</span>':''}</span>
    <span class="side">${recentAbs.map(a=>`<span class="ab"><span class="hk">休</span>${mdw(a.date)}</span>`).join('')}${c&&c.done?'<span class="hk" title="この回はチェックがすべて済">済</span>':''}
@@ -236,7 +261,8 @@ function row(t){
    ${prints.length?`<ul class="prints">${prints.map(it=>`<li><span class="k">${esc(KIND[it.kind]||it.glabel)}</span><span>${esc(it.title)}</span></li>`).join('')}</ul>`:''}
    ${on.length?`<p class="mm">チェック済：${on.map(x=>esc(x.l)).join('・')}</p>`:''}
    ${t.sets.length>1?`<ul class="hl">${t.sets.slice().reverse().filter(s=>!s.cur).map(s=>`<li><span class="lb">${esc(s.label)}</span><span class="t">${esc(s.title)}</span>${s.done?'<span class="ok">済</span>':''}</li>`).join('')}</ul>`:''}
-   ${showLog?`<p class="mm">${mdw(lg.date)}　${esc(lg.text)}</p>`:''}
+   <div class="acts"><button type="button" class="btn abs-b" data-act="abs" data-key="${esc(key)}">休み</button><button type="button" class="btn" data-act="note" data-key="${esc(key)}">記録を書く</button></div>
+   ${t.log.length?`<ul class="lg">${t.log.slice(0,3).map((l,i)=>`<li><span class="d">${mdw(l.date)}</span><span class="x">${isAbs(l)?'<span class="hk">休</span>':''}${esc(l.text)}</span><button type="button" class="x-b" data-act="del" data-key="${esc(key)}" data-i="${i}" aria-label="この記録を消す">消す</button></li>`).join('')}</ul>`:''}
    <a class="open" href="${esc(t.url)}">教材サイトで開く →</a>
   </div></details>`;
 }
@@ -266,6 +292,122 @@ function vFind(){
 
 $('#fSubj').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F.subj=b.dataset.s;saveF();render()});
 $('#fGrade').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;F.grade=b.dataset.g;saveF();render()});
+/* ---------- 書きこみ（GitHub の教材棚へ） ---------- */
+const OWNER='morihayashi-juku',TK='shindo-gh-token',PK='shindo-pending';
+const tok=()=>{try{return localStorage.getItem(TK)||''}catch(e){return''}};
+const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,'')),c=>c.charCodeAt(0)));
+const b64e=s=>{const b=new TextEncoder().encode(s);let x='';for(let i=0;i<b.length;i+=0x8000)x+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(x)};
+const gh=(path,opt={})=>fetch('https://api.github.com'+path,{...opt,cache:'no-store',headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+tok(),'X-GitHub-Api-Version':'2022-11-28',...(opt.body?{'Content-Type':'application/json'}:{})}});
+async function editTrack(t,fn,msg){
+  const path=`/repos/${OWNER}/${t.src.id}/contents/data/${t.id}.json`;
+  for(let k=0;k<3;k++){
+    const r=await gh(path+'?ref=main');
+    if(r.status===401)throw new Error('鍵が使えません（まちがい・期限切れ）。設定から入れ直してください。');
+    if(!r.ok)throw new Error('教材棚のデータを読めませんでした（'+r.status+'）');
+    const j=await r.json(),raw=b64d(j.content),d=JSON.parse(raw);
+    fn(d);d.updated=today();
+    const out=JSON.stringify(d,null,1)+(raw.endsWith('\n')?'\n':'');
+    const w=await gh(path,{method:'PUT',body:JSON.stringify({message:msg,content:b64e(out),sha:j.sha,branch:'main'})});
+    if(w.ok)return d;
+    if(w.status===409||w.status===422){await new Promise(z=>setTimeout(z,800));continue}
+    if(w.status===401||w.status===403||w.status===404)throw new Error('この鍵では'+t.src.subj+'の教材棚に書きこめません。鍵の「Repository access」に '+t.src.id+'、「Contents」に Read and write が入っているか確かめてください。');
+    throw new Error('書きこめませんでした（'+w.status+'）');
+  }
+  throw new Error('ほかの書きこみと重なりました。少し待ってもう一度押してください。');
+}
+/* 書きこんだ直後はサイトの反映に1〜2分かかるので、その間はこの端末で覚えておいて重ねる */
+const pend=()=>{try{return JSON.parse(localStorage.getItem(PK)||'[]').filter(p=>Date.now()-p.at<15*60e3)}catch(e){return[]}};
+const savePend=a=>{try{localStorage.setItem(PK,JSON.stringify(a))}catch(e){}};
+function applyPending(){
+  for(const p of pend()){const t=TR.find(x=>x.src.id===p.src&&x.id===p.id);if(!t)continue;
+    const i=t.log.findIndex(l=>l.date===p.e.date&&l.text===p.e.text);
+    if(p.op==='add'&&i<0)t.log.unshift({...p.e});if(p.op==='del'&&i>=0)t.log.splice(i,1);
+    if(p.upd)t.upd=p.upd;}
+}
+const fk=k=>TR.find(t=>t.src.id+'/'+t.id===k);
+async function addLog(t,e){
+  const d=await editTrack(t,d=>{d.log=Array.isArray(d.log)?d.log:[];d.log.unshift(e)},`記録（進度ボード）：${t.name} ${e.date} ${e.text.slice(0,30)}`);
+  t.log=(d.log||[]).map(x=>({date:x.date||'',text:x.text||''}));t.upd=d.updated;derive(t);
+  savePend([...pend(),{op:'add',src:t.src.id,id:t.id,e,upd:d.updated,at:Date.now()}]);
+}
+async function delLog(t,e){
+  const d=await editTrack(t,d=>{const i=(d.log||[]).findIndex(l=>l.date===e.date&&l.text===e.text);if(i<0)throw new Error('その記録はもう消えています');d.log.splice(i,1)},`記録を消す（進度ボード）：${t.name} ${e.date}`);
+  t.log=(d.log||[]).map(x=>({date:x.date||'',text:x.text||''}));t.upd=d.updated;derive(t);
+  savePend([...pend().filter(p=>!(p.op==='add'&&p.src===t.src.id&&p.id===t.id&&p.e.date===e.date&&p.e.text===e.text)),{op:'del',src:t.src.id,id:t.id,e,at:Date.now()}]);
+}
+
+/* ---------- 画面の小窓 ---------- */
+const M=$('#modal');let nt;
+function note(x){const n=$('#note');n.textContent=x;n.hidden=false;clearTimeout(nt);nt=setTimeout(()=>n.hidden=true,4000)}
+function openModal(html,submit){
+  M.innerHTML=`<form class="panel" novalidate>${html}<p class="err-m" id="mErr" hidden></p></form>`;M.hidden=false;
+  const f=M.firstElementChild;
+  f.addEventListener('submit',async ev=>{ev.preventDefault();const b=f.querySelector('.pri'),m=f.querySelector('#mErr');m.hidden=true;b.disabled=true;const o=b.textContent;b.textContent='書きこみ中…';
+    try{await submit(f);closeModal();render()}catch(e){m.textContent=e.message||String(e);m.hidden=false}finally{b.disabled=false;b.textContent=o}});
+  f.addEventListener('click',e=>{if(e.target.closest('[data-close]'))closeModal()});
+  return f;
+}
+function closeModal(){M.hidden=true;M.innerHTML=''}
+M.addEventListener('click',e=>{if(e.target===M)closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!M.hidden)closeModal()});
+const btns=l=>`<div class="mb"><button type="button" class="btn" data-close>やめる</button><button class="btn pri">${l}</button></div>`;
+function lastLesson(t){if(!t.dd)return today();const x=new Date();x.setHours(0,0,0,0);for(let i=0;i<8;i++){const y=new Date(x);y.setDate(x.getDate()-i);if(t.dd.includes(DK[y.getDay()]))return iso(y)}return today()}
+function needTok(){if(tok())return false;openSettings('記録を書きこむには、最初に1回だけ鍵を入れます。');return true}
+function openAbs(t){
+  if(needTok())return;
+  openModal(`<h2><span style="color:var(--c)">${esc(t.name)}</span> の休み</h2><p class="mh">${esc(t.src.subj)}の教材棚の記録に「休み」と書きこみます。回は進めません。</p>
+  <label>休んだ日<input type="date" name="date" value="${lastLesson(t)}" required></label>
+  <label>理由（なくてもよい）<input type="text" name="why" placeholder="例：体調不良、家の用事" autocomplete="off"></label>
+  <label>どうするか（なくてもよい）<input type="text" name="plan" placeholder="例：この回はそのまま次の授業に" autocomplete="off"></label>
+  ${/人/.test(t.name)?'<p class="mh">何人かの組で1人だけ休んだときは、理由の欄に「1人：呼び名」と書いてください（本名は書かない）。</p>':''}
+  ${btns('休みを記録する')}`,async f=>{
+    const date=f.date.value||today(),why=f.why.value.trim(),plan=f.plan.value.trim();
+    const text='休み'+(why?`（${why}）`:'')+'。'+(plan?plan+(/[。．]$/.test(plan)?'':'。'):'');
+    await addLog(t,{date,text});note(`${t.name}：${md(date)} 休みを記録しました`);
+  });
+}
+function openNote(t){
+  if(needTok())return;
+  openModal(`<h2><span style="color:var(--c)">${esc(t.name)}</span> の記録</h2><p class="mh">${esc(t.src.subj)}の教材棚の記録の一番上に書きこみます。</p>
+  <label>日付<input type="date" name="date" value="${today()}" required></label>
+  <label>記録<textarea name="text" rows="3" placeholder="例：⑥ A を終えた。16問中12問。×÷の順番はできてきた" required></textarea></label>
+  <p class="mh">公開サイトに残るので、本名は書かないでください。</p>
+  ${btns('記録する')}`,async f=>{
+    const text=f.text.value.trim();if(!text)throw new Error('記録を書いてください');
+    await addLog(t,{date:f.date.value||today(),text});note(`${t.name}：記録しました`);
+  });
+}
+function openDel(t,i){
+  const e=t.log[i];if(!e)return;if(needTok())return;
+  openModal(`<h2>この記録を消しますか？</h2><p class="mh">${mdw(e.date)}　${esc(e.text)}</p>${btns('消す')}`,async()=>{await delLog(t,e);note('記録を消しました')});
+}
+function openSettings(lead){
+  const has=!!tok();
+  const f=openModal(`<h2>設定：書きこみの鍵</h2>${lead?`<p class="mh"><b>${esc(lead)}</b></p>`:''}
+  <p class="mh">今：${has?'<b>鍵が入っています</b>（この端末だけ）':'鍵は入っていません'}</p>
+  <details class="howto"${has?'':' open'}><summary>鍵の作り方（最初の1回だけ）</summary><ol>
+   <li>このiPadのSafariで <a href="https://github.com/settings/personal-access-tokens/new">GitHub の「新しい鍵を作る」ページ</a> を開く（ログインを聞かれたらログイン）。</li>
+   <li><b>Token name</b>：「進度ボード」。<b>Expiration</b>：Custom で1年後の日付。</li>
+   <li><b>Resource owner</b>：morihayashi-juku のまま。</li>
+   <li><b>Repository access</b>：「Only select repositories」→ <b>sugaku</b> と <b>eigo</b> の2つを選ぶ。</li>
+   <li><b>Permissions</b> →「Repository permissions」→ <b>Contents</b> を「<b>Read and write</b>」にする（Metadata は自動で Read-only になる）。</li>
+   <li>いちばん下の <b>Generate token</b> → 出てきた <code>github_pat_</code> で始まる文字をコピーして、下に貼る。この文字は二度と表示されないので、ここに貼ったら閉じてよい。</li>
+  </ol><p class="mh">鍵はこのiPadの中だけにしまわれ、GitHubのページには載りません。iPadをなくしたときは、GitHub の Settings → Developer settings → Fine-grained tokens で「進度ボード」を Delete してください。</p></details>
+  <label>鍵（github_pat_…）<input type="password" name="tk" autocomplete="off" placeholder="${has?'入れ直すときだけ貼る':'ここに貼る'}"></label>
+  <div class="mb">${has?'<button type="button" class="btn" id="tkDel">鍵を消す</button>':''}<button type="button" class="btn" data-close>閉じる</button><button class="btn pri">保存して確かめる</button></div>`,async f=>{
+    const v=f.tk.value.trim();if(!v){if(has)return;throw new Error('鍵を貼ってください')}
+    if(!/^(github_pat_|ghp_)/.test(v))throw new Error('github_pat_ で始まる文字を貼ってください');
+    const old=tok();try{localStorage.setItem(TK,v)}catch(e){throw new Error('この端末に保存できませんでした')}
+    const r=await gh(`/repos/${OWNER}/sugaku/contents/data/common.json?ref=main`);
+    if(r.status===401){try{old?localStorage.setItem(TK,old):localStorage.removeItem(TK)}catch(e){}throw new Error('この鍵は使えませんでした。コピーし直して貼ってください。')}
+    note('鍵を保存しました。最初に書きこんだときに、書きこめるか確かめます');
+  });
+  const d=f.querySelector('#tkDel');if(d)d.addEventListener('click',()=>{try{localStorage.removeItem(TK)}catch(e){}closeModal();note('鍵を消しました')});
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||M.contains(b))return;const t=fk(b.dataset.key);if(!t)return;
+  if(b.dataset.act==='abs')openAbs(t);else if(b.dataset.act==='note')openNote(t);else if(b.dataset.act==='del')openDel(t,+b.dataset.i)});
+document.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('row')){d.open?OPEN.add(d.dataset.key):OPEN.delete(d.dataset.key)}},true);
+$('#openSet').addEventListener('click',()=>openSettings());
 $('#reload').addEventListener('click',load);
 addEventListener('hashchange',()=>{render();scrollTo(0,0)});
 addEventListener('pageshow',e=>{if(e.persisted)load()});
